@@ -1,3 +1,4 @@
+import random
 from gameView import GameView
 from Shape import Shape
 
@@ -16,15 +17,28 @@ class GameController(GameView.GameViewListener):
         12  13  14  15
         """
         self.inTurn = False
+        self.AIturn = False
 
     
     def play(self):
+        print("Who starts? AI or You?")
+        starter = str(input("(Enter me if you want start, AI otherwise) "))
+        while(starter != "AI" and starter != "me"):
+            starter = str(input("Please, enter a right answer. (me if you want start, AI otherwise) "))
+        if(starter == "AI"):
+            self.AIturn = True
         while True:
             self.chooseShape()
             self.inTurn = True
-            print("Please, choose a void case in the game board")
-            while(self.inTurn):
-                self.gameView.waitEvent()
+            if(not self.AIturn):
+                self.AIChooseCase()
+                self.AIturn = True
+            else:
+                print("Please, choose a void case in the game board")
+                while(self.inTurn):
+                    self.gameView.waitEvent()
+                self.AIturn = False
+            self.gameView.refreshAll()
 
 
     def mouseClick(self, surface, case):
@@ -33,7 +47,7 @@ class GameController(GameView.GameViewListener):
             self.gameView.refresh(case)
             self.board[case] = self.currentShape
             if(self.quarto()):
-                print("QUARTO!")
+                print("QUARTO! You win the game")
                 self.gameView.end()
             self.inTurn = False
         else:
@@ -53,17 +67,42 @@ class GameController(GameView.GameViewListener):
 
 
     def chooseShape(self) -> Shape:
-        print("Available shapes:")
-        for i in range(len(self.shapes)):
-            if(not self.alreadyTakenShape[i]):
-                self.shapes[i].print()
-        choice = int(input("Please, enter the number of the form that you choose: "))
-        while (choice < 0 or choice > 17):
-            choice = int(input("Please, enter a right number: "))
-        while (self.alreadyTakenShape[choice-1]):
-            choice = int(input("Please, enter a right number: "))
-        self.alreadyTakenShape[choice-1] = True
-        self.currentShape = self.shapes[choice-1]
+        if(self.AIturn):
+            random.seed(None)
+            choice = random.randint(0, 15)
+            while (self.alreadyTakenShape[choice]):
+                choice = random.randint(0, 15)
+            self.alreadyTakenShape[choice] = True
+            self.currentShape = self.shapes[choice]
+            print("The AI has chosen for you the form:")
+            self.currentShape.print()
+        else:
+            print("Available shapes:")
+            for i in range(len(self.shapes)):
+                if(not self.alreadyTakenShape[i]):
+                    self.shapes[i].print()
+            choice = int(input("Please, enter the number of the form that you choose: "))
+            while (choice < 0 or choice > 17):
+                choice = int(input("Please, enter a right number: "))
+            while (self.alreadyTakenShape[choice-1]):
+                choice = int(input("Please, enter a right number: "))
+            self.alreadyTakenShape[choice-1] = True
+            self.currentShape = self.shapes[choice-1]
+
+
+    def AIChooseCase(self):
+        choice = random.randint(0, 15)
+        while(self.board[choice] != None):
+            choice = random.randint(0, 15)
+        surface = self.gameView.getSurface(choice)
+        self.currentShape.draw(surface)
+        self.board[choice] = self.currentShape
+        self.gameView.refresh(choice)
+        if(self.quarto()):
+            print("QUARTO! AI win the game")
+            self.gameView.end()
+        self.inTurn = False
+        
 
 
     def quarto(self):

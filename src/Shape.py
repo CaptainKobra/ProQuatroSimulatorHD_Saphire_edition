@@ -16,7 +16,7 @@ class Shape:
             self.shape_size = min(width, height) // 6
         else:
             self.shape_size = min(width, height) // 3
-        if filled:
+        if not filled:
             self.shape_width = 5
         else:
             self.shape_width = 0 

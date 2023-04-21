@@ -44,6 +44,10 @@ class GameView:
 
     def getSizes(self):
         return (self.width, self.height)
+    
+
+    def getSurface(self, i):
+        return self.shape_surfaces[i]
 
 
     def waitEvent(self):
@@ -72,5 +76,13 @@ class GameView:
 
     
     def refresh(self, case):
+        pygame.event.clear()
         self.screen.blit(self.shape_surfaces[case], self.cases[case])
+        pygame.display.flip()
+
+
+    def refreshAll(self):
+        pygame.event.clear()
+        for i in range(16):
+            self.screen.blit(self.shape_surfaces[i], self.cases[i])
         pygame.display.flip()
