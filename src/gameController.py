@@ -139,30 +139,34 @@ class GameController(GameView.GameViewListener):
     def sameSize(self, pieces):
         size = pieces[0].getSize()
         for i in range(1,4):
+            #print(size, "   ", pieces[i].getSize())
             if(pieces[i].getSize() != size):
                 return False
         return 
     
     def sameShape(self, pieces):
-        size = pieces[0].getShape()
+        shape = pieces[0].getShape()
         for i in range(1,4):
-            if(pieces[i].getShape() != size):
+            #print(shape, "   ", pieces[i].getShape())
+            if(pieces[i].getShape() != shape):
                 return False
         return True
     
 
     def sameColor(self, pieces):
-        size = pieces[0].getColor()
+        color = pieces[0].getColor()
         for i in range(1,4):
-            if(pieces[i].getColor() != size):
+            #print(color, "   ", pieces[i].getColor())
+            if(pieces[i].getColor() != color):
                 return False
         return True
     
 
     def sameFilled(self, pieces):
-        size = pieces[0].getFilled()
+        filled = pieces[0].getFilled()
         for i in range(1,4):
-            if(pieces[i].getFilled() != size):
+            #print(filled, "   ", pieces[i].getFilled())
+            if(pieces[i].getFilled() != filled):
                 return False
         return True
     
