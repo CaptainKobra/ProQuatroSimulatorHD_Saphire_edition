@@ -31,6 +31,13 @@ def has_won():
         pieces_in_col = [board[i][j] for i in range(4) if board[i][j] is not None]
         if len(pieces_in_col) == 4 and has_common_property(pieces_in_col):
             return True
+    # Check diagonals
+    pieces_in_diag = [board[i][i] for i in range(4) if board[i][i] is not None]
+    if len(pieces_in_diag) == 4 and has_common_property(pieces_in_diag):
+        return True
+    pieces_in_diag = [board[i][3-i] for i in range(4) if board[i][3-i] is not None]
+    if len(pieces_in_diag) == 4 and has_common_property(pieces_in_diag):
+        return True
     return False
 
 
