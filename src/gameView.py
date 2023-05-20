@@ -15,7 +15,7 @@ class GameView:
         white = (255, 255, 255)
         red = (255, 0, 0)
         blue = (0, 0, 255)
-        self.colors = {"black":black, "white":white, "red":red, "blu":blue}
+        self.colors = {"black":black, "white":white, "red":red, "blue":blue}
 
         self.width = 100
         self.height = 100

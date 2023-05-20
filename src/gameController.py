@@ -133,7 +133,7 @@ class GameController(GameView.GameViewListener):
         if(self.sameColor(pieces)):
             return True
         if(self.sameFilled(pieces)):
-            return 
+            return True
         return False
         
     def sameSize(self, pieces):
