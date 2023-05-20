@@ -142,7 +142,7 @@ class GameController(GameView.GameViewListener):
             #print(size, "   ", pieces[i].getSize())
             if(pieces[i].getSize() != size):
                 return False
-        return 
+        return True
     
     def sameShape(self, pieces):
         shape = pieces[0].getShape()
