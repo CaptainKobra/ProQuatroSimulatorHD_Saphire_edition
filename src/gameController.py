@@ -7,6 +7,15 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
     def __init__(self) -> None:
         self.inTurn = False
         self.AIturn = False
+        self.done = False
+
+
+    def reset(self):
+        self.inTurn = False
+        self.AIturn = False
+        self.done = False
+        self.start()
+
 
     def init(self):
         self.gameView = GameView()
@@ -56,10 +65,13 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
         """
         Boucle de jeu
         """
-        while True:
+        while not self.done:
             self.PlayerPlay()
+            if self.done: break
             self.AIplay()
+            if self.done: break
             self.gameView.refreshAll()
+        self.reset()
 
 
     def AIplay(self):
@@ -67,7 +79,8 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
             self.AIChooseCase()
 
         # Choose a shape for the player
-        self.AIChooseshape()
+        if not self.done:
+            self.AIChooseshape()
 
     # The ia place a shape in the board
     def AIChooseCase(self):
@@ -81,8 +94,8 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
         if(self.quarto()):
             #print("QUARTO! AI win the game")
             self.gameView.quarto("AI")
-            self.gameView.end()
-            self.start()
+            #self.gameView.end()
+            self.done = True
         self.inTurn = False
 
     # Choose a shape for the player
@@ -102,7 +115,8 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
         self.inTurn = True
         if(self.currentShape != None):
             self.playerChooseCase()
-        self.playerChooseShape()
+        if not self.done:
+            self.playerChooseShape()
         self.inTurn = False
 
     # Place the shape in the board
@@ -110,6 +124,11 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
         #print("Please, choose a void case in the game board")
         while(self.inTurn):
             self.gameView.waitEvent()
+            if(self.quarto()):
+                #print("QUARTO! You win the game")
+                self.gameView.quarto("YOU")
+                #self.gameView.end()
+                self.done = True
 
 
     def select(self, shape):
@@ -129,16 +148,12 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
         while not self.selected:
             self.gameView.waitSelectEvent()
 
+
     def mouseClick(self, surface, case):
         if(self.board[case] == None):
             self.currentShape.draw(surface)
             self.gameView.refresh(case)
             self.board[case] = self.currentShape
-            if(self.quarto()):
-                #print("QUARTO! You win the game")
-                self.gameView.quarto("YOU")
-                self.gameView.end()
-                self.start()
             self.inTurn = False
         else:
             pass

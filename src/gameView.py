@@ -114,7 +114,7 @@ class GameView:
         event = pygame.event.wait(1000000)
         if event.type == pygame.QUIT:
             pygame.quit()
-            #quit()
+            quit()
         elif event.type == pygame.MOUSEBUTTONDOWN:
             for i, rect in enumerate(self.selectCases):
                 if rect.collidepoint(event.pos):
@@ -153,15 +153,16 @@ class GameView:
         pygame.display.flip()
 
 
-    def end(self):
+    #def end(self):
         """
         Fin de la partie. Attend que l'utilisateur ferme l'application.
         """
-        while True:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    quit()
+        #while True:
+        #    for event in pygame.event.get():
+        #        if event.type == pygame.QUIT:
+        #           pygame.quit()
+        #            break
+        #    break
 
     
     def refresh(self, case):
