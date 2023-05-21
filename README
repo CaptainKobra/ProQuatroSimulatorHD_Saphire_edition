@@ -5,8 +5,13 @@
 
 
 
-### Notes
+### Librairies
 
 pgu -> https://github.com/parogers/pgu  <br/>
 
-utile pour avoir des widgets déjà faits.
+utile pour avoir des widgets déjà faits. <br/>
+
+
+customtkinter -> https://github.com/TomSchimansky/CustomTkinter (documentation -> https://customtkinter.tomschimansky.com/) <br />
+
+tkinter en un peu plus perfectionné. Utilisé pour StartWindow.

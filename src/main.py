@@ -1,6 +1,6 @@
 from gameController import GameController
 
 if __name__ == '__main__':
+
     mainController = GameController()
-    mainController.createShapes()
-    mainController.play()
+    mainController.start()

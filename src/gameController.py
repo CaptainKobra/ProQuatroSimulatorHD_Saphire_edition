@@ -1,9 +1,14 @@
 import random
 from gameView import GameView
 from Shape import Shape
+from StartWindow import StartWindow
 
-class GameController(GameView.GameViewListener):
+class GameController(GameView.GameViewListener, StartWindow.Listener):
     def __init__(self) -> None:
+        self.inTurn = False
+        self.AIturn = False
+
+    def init(self):
         self.gameView = GameView()
         self.gameView.setListener(self)
         self.shapes = []
@@ -16,22 +21,39 @@ class GameController(GameView.GameViewListener):
         8   9   10  11  \n
         12  13  14  15
         """
-        self.inTurn = False
-        self.AIturn = False
+
+
+    def start(self):
+        """
+        Appelle la fenêtre de départ
+        """
+        sw = StartWindow()
+        sw.setListener(self)
+        sw.run()
+
+
+    def draw(self, surface, case:int):
+        """
+        Dessine la forme d'index "case" dans la surface "surface"
+        """
+        self.shapes[case].draw(surface)
+
+    
+    def selectStarter(self, starter: str):
+        """
+        Sélectionne le joueur qui commence (l'utilisateur ou l'IA)
+        """
+        if(starter == "AI"):
+            self.AIturn = True
+        self.init()
+        self.createShapes()
+        self.gameView.drawSelectSurfaces()
+        self.play()
 
     
     def play(self):
-        self.gameView.welcome()
-        starter = self.gameView.getStarter()
-        if(starter == "AI"):
-            self.AIturn = True
         """
-        print("Who starts? AI or You?")
-        starter = str(input("(Enter me if you want start, AI otherwise) "))
-        while(starter != "AI" and starter != "me"):
-            starter = str(input("Please, enter a right answer. (me if you want start, AI otherwise) "))
-        if(starter == "AI"):
-            self.AIturn = True
+        Boucle de jeu
         """
         while True:
             self.chooseShape()
@@ -54,7 +76,9 @@ class GameController(GameView.GameViewListener):
             self.board[case] = self.currentShape
             if(self.quarto()):
                 print("QUARTO! You win the game")
+                self.gameView.quarto("YOU")
                 self.gameView.end()
+                self.start()
             self.inTurn = False
         else:
             print("Choose an other case")
@@ -82,18 +106,19 @@ class GameController(GameView.GameViewListener):
             self.currentShape = self.shapes[choice]
             print("The AI has chosen for you the form:")
             self.currentShape.print()
+            self.gameView.AIselected(choice)
         else:
-            print("Available shapes:")
-            for i in range(len(self.shapes)):
-                if(not self.alreadyTakenShape[i]):
-                    self.shapes[i].print()
-            choice = int(input("Please, enter the number of the form that you choose: "))
-            while (choice < 0 or choice > 17):
-                choice = int(input("Please, enter a right number: "))
-            while (self.alreadyTakenShape[choice-1]):
-                choice = int(input("Please, enter a right number: "))
-            self.alreadyTakenShape[choice-1] = True
-            self.currentShape = self.shapes[choice-1]
+            print("choose a shape")
+            self.selected = False
+            while not self.selected:
+                self.gameView.waitSelectEvent()
+                
+
+    def select(self, shape):
+        self.currentShape = self.shapes[shape]
+        if not self.alreadyTakenShape[shape]:
+            self.alreadyTakenShape[shape] = True
+            self.selected = True
 
 
     def AIChooseCase(self):
@@ -106,7 +131,9 @@ class GameController(GameView.GameViewListener):
         self.gameView.refresh(choice)
         if(self.quarto()):
             print("QUARTO! AI win the game")
+            self.gameView.quarto("AI")
             self.gameView.end()
+            self.start()
         self.inTurn = False
         
 

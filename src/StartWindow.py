@@ -1,6 +1,10 @@
 from customtkinter import (CTk, CTkLabel, CTkButton, StringVar)
 
 class StartWindow:
+    class Listener:
+        def selectStarter(self, starter:str):
+            pass
+
     def __init__(self) -> None:
         self.root = CTk()
         self.root.title("QUARTO")
@@ -18,6 +22,12 @@ class StartWindow:
         self.startButton.pack()
         self.exitButton.pack()
 
+        self.listener = None
+
+
+    def setListener(self, l:Listener):
+        self.listener = l
+
 
     def run(self):
         self.root.mainloop()
@@ -29,19 +39,20 @@ class StartWindow:
             self.texButton1.set("Me")
             self.texButton2.set("AI")
         else:
-            print("Player")
             self.root.destroy()
+            self.listener.selectStarter("player")
 
 
     def onButton2Click(self):
         if self.texButton2.get() == "Exit":
             exit(0)
         else:
-            print("AI")
             self.root.destroy()
+            self.listener.selectStarter("AI")
             
 
-
+"""
 w = StartWindow()
 w.run()
 print("end")
+"""
