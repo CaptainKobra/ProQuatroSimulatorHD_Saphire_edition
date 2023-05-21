@@ -71,7 +71,6 @@ class GameView:
         """
         Affiche le vainqueur
         """
-        print("in quarto")
         font = pygame.font.SysFont("default", 80)
         text.writec(self.screen, font, self.colors['white'], "QUARTO! The winner is: "+winner, border=5)
         pygame.display.flip()
@@ -117,7 +116,6 @@ class GameView:
             pygame.quit()
             #quit()
         elif event.type == pygame.MOUSEBUTTONDOWN:
-            print("mousebuttondown")
             for i, rect in enumerate(self.selectCases):
                 if rect.collidepoint(event.pos):
                     # La souris est dans cette case
