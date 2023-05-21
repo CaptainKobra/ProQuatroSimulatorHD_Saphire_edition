@@ -1,4 +1,9 @@
 import pygame
+from pygame.locals import *
+from pgu import gui
+from MyApp import MyApp
+
+from AppController import AppController
 
 class GameView:
 
@@ -9,7 +14,13 @@ class GameView:
     def __init__(self) -> None:
         self.listener = None
         pygame.init()
-        self.screen = pygame.display.set_mode((400, 400))
+        self.screen = pygame.display.set_mode((800, 600), SWSURFACE)
+
+        self.app = MyApp()
+        self.container = gui.Container(align=-1,valign=-1)
+        ctr = AppController()
+        self.container.add(ctr,0,0)
+        self.app.init(self.container)
 
         black = (0, 0, 0)
         white = (255, 255, 255)
@@ -53,6 +64,7 @@ class GameView:
     def waitEvent(self):
         pygame.event.clear()
         event = pygame.event.wait(1000000)
+        self.app.event(event)
         if event.type == pygame.QUIT:
             pygame.quit()
             quit()
@@ -85,4 +97,5 @@ class GameView:
         pygame.event.clear()
         for i in range(16):
             self.screen.blit(self.shape_surfaces[i], self.cases[i])
+        self.app.paint()
         pygame.display.flip()
