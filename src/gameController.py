@@ -21,12 +21,18 @@ class GameController(GameView.GameViewListener):
 
     
     def play(self):
+        self.gameView.welcome()
+        starter = self.gameView.getStarter()
+        if(starter == "AI"):
+            self.AIturn = True
+        """
         print("Who starts? AI or You?")
         starter = str(input("(Enter me if you want start, AI otherwise) "))
         while(starter != "AI" and starter != "me"):
             starter = str(input("Please, enter a right answer. (me if you want start, AI otherwise) "))
         if(starter == "AI"):
             self.AIturn = True
+        """
         while True:
             self.chooseShape()
             self.inTurn = True

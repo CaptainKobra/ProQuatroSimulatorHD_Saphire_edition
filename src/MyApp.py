@@ -4,6 +4,11 @@ from Dialogs.QuitDialog import QuitDialog
 from Dialogs.WelcomeDialog import WelcomeDialog
 
 class MyApp(gui.App):
+    class Listener:
+        def selectStarter(self, starter:str):
+            pass
+
+
     def __init__(self, theme=None, **params):
         super().__init__(theme, **params)
 
@@ -16,18 +21,25 @@ class MyApp(gui.App):
         self.app.connect(gui.QUIT,self.quit_d.open,None)
 
         self.welcome_d = WelcomeDialog()
-        self.app.connect(gui.INIT,self.welcome_d.open,None)
+        self.app.connect(200,self.welcome_d.open,None)
         self.welcome_d.connect(gui.const.QUIT,self.quit,None)
         self.welcome_d.connect(150,self.start,None)
 
+        self.listener = None
+
+
+    def setListener(self, l:Listener):
+        self.listener = l
+
 
     def action_new(self,value=None):
-        print(value)
         self.new_d.close()
-        # TODO
+        self.repaint()
+        self.listener.selectStarter(value)
 
 
     def start(self, value=None):
         self.welcome_d.close()
+        self.repaint()
         self.new_d.open()
 

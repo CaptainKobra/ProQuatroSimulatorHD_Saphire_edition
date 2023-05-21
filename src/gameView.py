@@ -5,7 +5,7 @@ from MyApp import MyApp
 
 from AppController import AppController
 
-class GameView:
+class GameView(MyApp.Listener):
 
     class GameViewListener:
         def mouseClick(self, surface, case):
@@ -17,6 +17,7 @@ class GameView:
         self.screen = pygame.display.set_mode((800, 600), SWSURFACE)
 
         self.app = MyApp()
+        self.app.setListener(self)
         self.container = gui.Container(align=-1,valign=-1)
         ctr = AppController()
         self.container.add(ctr,0,0)
@@ -99,3 +100,26 @@ class GameView:
             self.screen.blit(self.shape_surfaces[i], self.cases[i])
         self.app.paint()
         pygame.display.flip()
+
+
+    def welcome(self):
+        self.app.send(200)
+        self.done = False
+        while not self.done:
+            for event in pygame.event.get():
+                self.app.event(event)
+            self.app.paint()
+            pygame.display.flip()
+
+    
+    def selectStarter(self, starter: str):
+        self.starter = starter
+        self.done = True
+
+    
+    def getStarter(self):
+        print(self.starter)
+        return self.starter
+
+
+

@@ -10,7 +10,7 @@ class NewDialog(gui.Dialog):
         t.td(gui.Label("Who starts the game ?"),align=0,colspan=2)
         
         t.tr()
-        b1 = gui.Button("You")
+        b1 = gui.Button("Me")
         b1.connect(gui.CLICK,self.send,151)
         t.td(b1)
         
