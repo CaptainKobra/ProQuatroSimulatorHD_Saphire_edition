@@ -193,3 +193,14 @@ class GameController(GameView.GameViewListener):
                 return False
         return True
     
+    # Write the current state of the game in a csv file
+    def writeGameStateInCSV(self):
+        # Write the state of the board
+        for case in self.board:
+            if case == None:
+                self.file.write("0,")
+            else:
+                self.file.write(case.num + ",")
+        # Write the one who is playing
+        if self.inTurn:
+            self.file.write("A,") 
