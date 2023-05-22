@@ -91,12 +91,14 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
         self.currentShape.draw(surface)
         self.board[choice] = self.currentShape
         self.gameView.refresh(choice)
-        if(self.quarto()):
+        if(self.quarto(self.board)):
             #print("QUARTO! AI win the game")
             self.gameView.quarto("AI")
             #self.gameView.end()
             self.done = True
         self.inTurn = False
+        print(self.evaluation(self.board, self.inTurn))
+
 
     # Choose a shape for the player
     def AIChooseshape(self):
@@ -124,11 +126,13 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
         #print("Please, choose a void case in the game board")
         while(self.inTurn):
             self.gameView.waitEvent()
-            if(self.quarto()):
+            if(self.quarto(self.board)):
                 #print("QUARTO! You win the game")
                 self.gameView.quarto("YOU")
                 #self.gameView.end()
                 self.done = True
+        
+        print(self.evaluation(self.board, self.inTurn))
 
 
     def select(self, shape):
@@ -172,7 +176,7 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
                         num += 1
         
 
-    def quarto(self):
+    def quarto(self, board):
         quarto = False
         # Check rows
         for i in range(4):
@@ -191,28 +195,17 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
         pieces_in_diag = [self.board[i] for i in range(3, 13, 3) if self.board[i] is not None]
         if len(pieces_in_diag) == 4 and self.has_common_property(pieces_in_diag):
             quarto = True
-        ## Write the winner at the end of the file
-        #if(quarto):
-        #    self.file.write(str(self.inTurn) + "\n")
 
         return quarto
     
 
     def has_common_property(self, pieces):
-        if(self.sameSize(pieces)):
-            return True
-        if(self.sameShape(pieces)):
-            return True
-        if(self.sameColor(pieces)):
-            return True
-        if(self.sameFilled(pieces)):
-            return True
-        return False
+        return self.sameSize(pieces) + self.sameShape(pieces) + self.sameColor(pieces) + self.sameFilled(pieces)
 
 
     def sameSize(self, pieces):
         size = pieces[0].getSize()
-        for i in range(1,4):
+        for i in range(1,len(pieces)):
             #print(size, "   ", pieces[i].getSize())
             if(pieces[i].getSize() != size):
                 return False
@@ -221,27 +214,113 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
 
     def sameShape(self, pieces):
         shape = pieces[0].getShape()
-        for i in range(1,4):
+        for i in range(1,len(pieces)):
             #print(shape, "   ", pieces[i].getShape())
             if(pieces[i].getShape() != shape):
-                return False
-        return True
+                return 0
+        return 1
     
 
     def sameColor(self, pieces):
         color = pieces[0].getColor()
-        for i in range(1,4):
+        for i in range(1,len(pieces)):
             #print(color, "   ", pieces[i].getColor())
             if(pieces[i].getColor() != color):
-                return False
-        return True
+                return 0
+        return 1
     
 
     def sameFilled(self, pieces):
         filled = pieces[0].getFilled()
-        for i in range(1,4):
+        for i in range(1,len(pieces)):
             #print(filled, "   ", pieces[i].getFilled())
             if(pieces[i].getFilled() != filled):
-                return False
-        return True
+                return 0
+        return 1
     
+    
+    def evaluation(self,board,playerTurn):
+        if self.quarto(board):
+            return 10000
+        else:
+            return self.connexion(self.board)
+
+
+    def connexion(self,board):
+        score = 0
+        score_row = 0
+        score_col = 0
+        score_diag = 0
+        # Check rows
+        for i in range(4):
+            pieces = self.get_line(board,i)  
+            score_row += (10**len(pieces))*self.common_properties_count(pieces)
+
+        # Check columns
+        for i in range(4):
+            pieces = self.get_column(board,i)  
+            score_col += (10**len(pieces))*self.common_properties_count(pieces)
+
+        # Check diagonals
+        pieces = self.get_diag_1(board)
+        score_diag += (10**len(pieces))*self.common_properties_count(pieces)
+        pieces = self.get_diag_2(board)
+        score_diag += (10**len(pieces))*self.common_properties_count(pieces)
+        print("score_diag : ",score_diag," score_col : ",score_col," score_row : ",score_row," total : ",score_diag + score_col + score_row)
+        return score_diag + score_col + score_row
+
+
+
+
+    def common_properties_count(self, shapes):
+        if len(shapes) == 0:
+            return 0
+        
+        color_in_common = 1
+        filled_in_common = 1
+        shape_in_common = 1
+        size_in_common = 1
+        first_color = shapes[0].color
+        first_filled = shapes[0].filled
+        first_shape = shapes[0].shape
+        first_size = shapes[0].size
+        
+        for shape in shapes:
+            if shape.getColor() != first_color:
+                color_in_common = 0
+            if shape.getFilled() != first_filled:
+                filled_in_common = 0
+            if shape.getShape() != first_shape:
+                shape_in_common = 0
+            if shape.getSize() != first_size:
+                size_in_common = 0
+            
+        return color_in_common + filled_in_common + shape_in_common + size_in_common
+    
+    def get_line(self,board,nb_line):
+        line = []
+        for i in range(4):
+            if board[i+nb_line*4] is not None:
+                line.append(board[i+nb_line*4])
+        return line
+    
+    def get_column(self,board,nb_column):
+        column = []
+        for i in range(4):
+            if board[i*4+nb_column] is not None:
+                column.append(board[i*4+nb_column])
+        return column
+    
+    def get_diag_1(self,board):
+        diag = []
+        for i in range(4):
+            if board[i*5] is not None:
+                diag.append(board[i*5])
+        return diag
+
+    def get_diag_2(self,board):
+        diag = []
+        for i in range(4):
+            if board[i*3+3] is not None:
+                diag.append(board[i*3+3])
+        return diag
