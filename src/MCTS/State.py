@@ -2,7 +2,7 @@ from Shape import Shape
 import random
 
 class State:
-    def __init__(self, shapes=None, state=None) -> None:
+    def __init__(self, shapes:list=None, previousSelectedShape=None, state=None) -> None:
         self.terminal = None
         if state == None:
             self.board = [None for i in range(16)]
@@ -12,36 +12,59 @@ class State:
             8   9   10  11  \n
             12  13  14  15
             """
-
-            self.shapes = shapes
-            self.alreadyTakenShapes = [False for i in range(16)]
+            self.availablePos = [i for i in range(16)]
+            self.availableShapes = shapes
+            #self.alreadyTakenShapes = [False for i in range(16)]
         else:
-            self.board, self.shapes, self.alreadyTakenShapes = state.getState()
+            self.board, self.shapes = state.getState()
+        self.previousSelectedShape = previousSelectedShape
+        print(self.availablePos)
 
 
     def getState(self):
-        return self.board, self.shapes, self.alreadyTakenShapes
+        return self.board, self.shapes
     
 
+    def randomPlaceShapeOnBoard(self) -> int:
+        if len(self.availablePos) > 0:
+            pos = random.choice(self.availablePos)
+            self.availablePos.remove(pos)
+            self.board[pos] = self.previousSelectedShape
+        else:
+            pos = None
+            #print(self.availablePos)
+        return pos
+
+
+    def randomSelectShape(self) -> Shape:
+        if len(self.availableShapes) > 0:
+            shape = random.choice(self.availableShapes)
+            self.availableShapes.remove(shape)
+            self.previousSelectedShape = shape
+        else:
+            shape = None
+        return shape
+
+
+    """
     def placeShapeOnBoard(self, shape:int, pos:int) -> bool:
         if not self.alreadyTakenShapes[shape] and self.board[pos] == None:
             self.alreadyTakenShapes[shape] = True
             self.board[pos] = self.shapes[shape]
             return True
         return False
+    """
 
 
     def isTerminal(self) -> bool:
-        if self.terminal == None:
-            if self.quarto():
+        if self.quarto():
+            self.terminal = True
+        else:
+            if len(self.availablePos) == 0:
                 self.terminal = True
+                #print(self.terminal)
             else:
-                try:
-                    self.board.index(None)
-                except:
-                    self.terminal = True
-                else:
-                    self.terminal = False
+                self.terminal = False
         return self.terminal
     
 
@@ -53,14 +76,8 @@ class State:
         
 
     def randomAction(self):
-        shape = random.randint(0, 15)
-        while self.alreadyTakenShapes[shape]:
-            shape = random.randint(0, 15)
-        pos = random.randint(0, 15)
-        while not self.board[pos] == None:
-            pos = random.randint(0, 15)  
-        self.alreadyTakenShapes[shape] = True
-        self.board[pos] = self.shapes[shape]
+        self.randomPlaceShapeOnBoard()
+        self.randomSelectShape()
 
 
     def quarto(self) -> bool:

@@ -9,10 +9,37 @@ class Node:
         self.childeren = []
         self.parent = parent
         self.action = []
+        self.N = 0
+        self.Q = 0
+        self.actionToObtain = None
+
+
+    def getN(self):
+        return self.N
+    
+
+    def getQ(self):
+        return self.Q
+    
+
+    def addToN(self, val):
+        self.N += val
+
+
+    def addToQ(self, val):
+        self.Q += val
 
 
     def getState(self):
         return self.state
+    
+
+    def setActionToObtain(self, action):
+        self.actionToObtain = action
+
+
+    def getActionToObtain(self):
+        return self.actionToObtain
     
 
     def isTerminal(self) -> bool:
@@ -20,13 +47,22 @@ class Node:
     
 
     def notFullyExpanded(self):
-        if len(self.childeren < 256):
+        if len(self.childeren) < 256:
             return True
         else:
             return False
 
 
     def addRandomChild(self):
+        copyState = copy.deepcopy(self.state)
+        pos = copyState.randomPlaceShapeOnBoard()
+        selectedShape = copyState.randomSelectShape()
+        action = (pos, selectedShape)
+        child = Node(copyState, self)
+        self.childeren.append(child)
+        return child, action
+
+        """"
         action = self.selectAction()
         i = math.floor(action/16)
         j = action%16
@@ -39,8 +75,8 @@ class Node:
         self.action.append(action)
         self.childeren.append(child)
         return child, action
-        
-
+        """
+    """
     def selectAction(self):
         action = random.randint(0,255)
         while True:
@@ -51,6 +87,7 @@ class Node:
             else:
                 action = random.randint(0,255)
         return action
+    """
 
 
     def getChilderen(self):
