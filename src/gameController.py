@@ -241,9 +241,15 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
     
     def evaluation(self,board,playerTurn):
         if self.quarto(board):
-            return 10000
+            if playerTurn:
+               return 10000
+            else:
+                return -10000
         else:
-            return self.connexion(self.board)
+            if playerTurn:
+                return self.connexion(board)
+            else:
+                return self.connexion(self.board)
 
 
     def connexion(self,board):
