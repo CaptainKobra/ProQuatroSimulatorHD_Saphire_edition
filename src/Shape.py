@@ -34,8 +34,8 @@ class Shape:
     def getFilled(self):
         return self.filled
 
-    #def getCaract(self):
-    #    return (self.shape, self.color, self.size, self.filled)
+    def getCaract(self):
+        return (self.shape, self.color, self.size, self.filled)
     
 
     def print(self):
