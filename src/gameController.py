@@ -10,6 +10,7 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
         self.done = False
 
 
+
     def reset(self):
         self.inTurn = False
         self.AIturn = False
@@ -73,7 +74,7 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
             self.gameView.refreshAll()
         self.reset()
 
-
+    """
     def AIplay(self):
         if(self.currentShape != None):
             self.AIChooseCase()
@@ -111,6 +112,94 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
         #print("The AI has chosen for you the form:")
         #self.currentShape.print()
         self.gameView.AIselected(choice)
+    """
+
+    def AIplay(self):
+        if self.currentShape is not None:
+            self.AIChooseCase()
+
+        # Choose a shape for the player
+        if not self.done:
+            self.AIChooseshape()
+
+    # The AI places a shape on the board
+    def AIChooseCase(self):
+        best_score = float("-inf")
+        best_choice = None
+
+        for choice in range(16):
+            if self.board[choice] is None:
+                self.board[choice] = self.currentShape
+                score = self.minimax(self.board, False,3)
+                self.board[choice] = None
+
+                if score > best_score:
+                    best_score = score
+                    best_choice = choice
+
+        surface = self.gameView.getSurface(best_choice)
+        self.currentShape.draw(surface)
+        self.board[best_choice] = self.currentShape
+        self.gameView.refresh(best_choice)
+
+        if self.quarto(self.board):
+            self.gameView.quarto("AI")
+            self.done = True
+
+        self.inTurn = False
+
+    def minimax(self, board, is_maximizing, depth):
+        if self.quarto(board):
+            return 10000
+        elif self.is_board_full(board):
+            return 0
+        elif depth == 0:
+            return self.evaluation(board, is_maximizing)
+
+        if is_maximizing:
+            best_score = float("-inf")
+
+            for choice in range(16):
+                if board[choice] is None:
+                    board[choice] = self.currentShape
+                    score = self.minimax(board, False, depth - 1)
+                    board[choice] = None
+                    best_score = max(best_score, score)
+
+            return best_score
+        else:
+            best_score = float("inf")
+
+            for choice in range(16):
+                if board[choice] is None:
+                    board[choice] = self.get_next_shape()
+                    score = self.minimax(board, True, depth - 1)
+                    board[choice] = None
+                    best_score = min(best_score, score)
+
+            return best_score
+
+
+        # Choose a shape for the player
+    # Choose a shape for the player
+    def AIChooseshape(self):
+        best_score = float("-inf")
+        best_choice = None
+
+        for choice in range(16):
+            if not self.alreadyTakenShape[choice]:
+                self.alreadyTakenShape[choice] = True
+                self.currentShape = self.shapes[choice]
+                score = self.minimax(self.board, True, 3)
+                self.alreadyTakenShape[choice] = False
+
+                if score > best_score:
+                    best_score = score
+                    best_choice = choice
+
+        self.alreadyTakenShape[best_choice] = True
+        self.currentShape = self.shapes[best_choice]
+        self.gameView.AIselected(best_choice)
 
     # Turn of the player
     def PlayerPlay(self):
@@ -135,6 +224,8 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
         print(self.evaluation(self.board, self.inTurn))
 
 
+
+
     def select(self, shape):
         """
         Hérité de gameView.Listener -> met à jour self.selected pour le playerChooseShape
@@ -145,7 +236,6 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
             self.selected = True
     
 
-    # Choose a shape for the ia
     def playerChooseShape(self):
         #print("choose a shape")
         self.selected = False
@@ -245,32 +335,25 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
         else:
             return self.connexion(self.board)
 
-
     def connexion(self,board):
         score = 0
-        score_row = 0
-        score_col = 0
-        score_diag = 0
+
         # Check rows
         for i in range(4):
             pieces = self.get_line(board,i)  
-            score_row += (10**len(pieces))*self.common_properties_count(pieces)
+            score += (10**len(pieces))*self.common_properties_count(pieces)
 
         # Check columns
         for i in range(4):
             pieces = self.get_column(board,i)  
-            score_col += (10**len(pieces))*self.common_properties_count(pieces)
+            score += (10**len(pieces))*self.common_properties_count(pieces)
 
         # Check diagonals
         pieces = self.get_diag_1(board)
-        score_diag += (10**len(pieces))*self.common_properties_count(pieces)
+        score += (10**len(pieces))*self.common_properties_count(pieces)
         pieces = self.get_diag_2(board)
-        score_diag += (10**len(pieces))*self.common_properties_count(pieces)
-        print("score_diag : ",score_diag," score_col : ",score_col," score_row : ",score_row," total : ",score_diag + score_col + score_row)
-        return score_diag + score_col + score_row
-
-
-
+        score += (10**len(pieces))*self.common_properties_count(pieces)
+        return score
 
     def common_properties_count(self, shapes):
         if len(shapes) == 0:
@@ -324,3 +407,15 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
             if board[i*3+3] is not None:
                 diag.append(board[i*3+3])
         return diag
+    
+    def is_board_full(self,board):
+        for i in range(16):
+            if board[i] is None:
+                return False
+        return True 
+    
+    def get_next_shape(self):
+        for shape in self.shapes:
+            if not self.alreadyTakenShape[shape.num]:
+                return shape
+        return None
