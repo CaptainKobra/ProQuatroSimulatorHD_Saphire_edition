@@ -103,6 +103,9 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
         if self.quarto(self.board):
             self.gameView.quarto("AI")
             self.done = True
+        self.inTurn = False
+        print(self.evaluation(self.board, self.inTurn))
+
 
 
     # Turn of the player
@@ -125,6 +128,9 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
                 self.gameView.quarto("YOU")
                 #self.gameView.end()
                 self.done = True
+        
+        print(self.evaluation(self.board, self.inTurn))
+
         
         print(self.evaluation(self.board, self.inTurn))
 
@@ -209,10 +215,12 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
     def sameShape(self, pieces):
         shape = pieces[0].getShape()
         for i in range(1,len(pieces)):
+
             #print(shape, "   ", pieces[i].getShape())
             if(pieces[i].getShape() != shape):
                 return 0
         return 1
+
     
 
     def sameColor(self, pieces):
@@ -222,6 +230,7 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
             if(pieces[i].getColor() != color):
                 return 0
         return 1
+
     
 
     def sameFilled(self, pieces):
