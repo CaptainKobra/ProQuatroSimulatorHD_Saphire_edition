@@ -87,26 +87,28 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
         self.currentGameState.generateTree(1)
         print("Tree generated")
         # Select a random child of the root
-        self.currentGameState = self.currentGameState.childrens[random.randint(0, len(self.currentGameState.childrens) - 1)]
+        if self.currentGameState.winningLeafs != []:
+            self.currentGameState = self.currentGameState.winningLeafs[0]
+        else:
+            self.currentGameState = self.currentGameState.childrens[random.randint(0, len(self.currentGameState.childrens) - 1)]
         # get the position of the current shape on the new board
         self.board = self.currentGameState.board
         currentShapePosition = self.board.index(self.currentShape)
         surface = self.gameView.getSurface(currentShapePosition)
         self.currentShape.draw(surface)
         self.gameView.refresh(currentShapePosition)
+        self.alreadyTakenShape = self.curr
         self.currentShape = self.currentGameState.currentShape
         self.alreadyTakenShape = self.currentGameState.alreadyTakenShape
         self.gameView.AIselected(self.shapes.index(self.currentShape))
         self.inTurn = self.currentGameState.inTurn
-        
 
         if self.quarto(self.board):
             self.gameView.quarto("AI")
             self.done = True
         self.inTurn = False
         print(self.evaluation(self.board, self.inTurn))
-
-
+        
 
     # Turn of the player
     def PlayerPlay(self):
@@ -339,10 +341,7 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
         self.currentGameState.currentShape = self.currentShape
         self.currentGameState.alreadyTakenShape = self.alreadyTakenShape
         self.currentGameState.inTurn = self.inTurn
-        self.currentGameState.childrens = []
         self.currentGameState.parent = None
-        self.currentGameState.winningLeafs = []
-        self.currentGameState.losingLeafs = []
 
 
 
