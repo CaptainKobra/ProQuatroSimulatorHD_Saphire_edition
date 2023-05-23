@@ -2,6 +2,7 @@ import random
 from gameView import GameView
 from Shape import Shape
 from StartWindow import StartWindow
+from gameState import gameState
 
 class GameController(GameView.GameViewListener, StartWindow.Listener):
     def __init__(self) -> None:
@@ -30,6 +31,7 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
         8   9   10  11  \n
         12  13  14  15
         """
+        self.currentGameState = gameState(self.board, self.currentShape, self.alreadyTakenShape, self.shapes, self.inTurn)
 
 
     def start(self):
@@ -56,8 +58,13 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
         self.init()
         self.createShapes()
         self.gameView.drawSelectSurfaces()
+
         if(starter == "AI"):
-            self.AIplay()
+            #Choose randomly a current shape
+            self.currentShape = self.shapes[random.randint(0, len(self.shapes) - 1)]
+            self.gameView.AIselected(self.shapes.index(self.currentShape))
+            self.alreadyTakenShape[self.shapes.index(self.currentShape)] = True
+
         self.play()
 
     
@@ -75,12 +82,27 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
 
 
     def AIplay(self):
-        if(self.currentShape != None):
-            self.AIChooseCase()
+        print("AI turn")
+        self.currentGameState.generateTree(2)
+        print("Tree generated")
+        # Select a random child of the root
+        self.currentGameState = self.currentGameState.childrens[random.randint(0, len(self.currentGameState.childrens) - 1)]
+        # get the position of the current shape on the new board
+        self.board = self.currentGameState.board
+        currentShapePosition = self.board.index(self.currentShape)
+        surface = self.gameView.getSurface(currentShapePosition)
+        self.currentShape.draw(surface)
+        self.gameView.refresh(currentShapePosition)
+        self.currentShape = self.currentGameState.currentShape
+        self.alreadyTakenShape = self.currentGameState.alreadyTakenShape
+        self.gameView.AIselected(self.shapes.index(self.currentShape))
+        self.inTurn = self.currentGameState.inTurn
+        
 
-        # Choose a shape for the player
-        if not self.done:
-            self.AIChooseshape()
+        if self.quarto(self.board):
+            self.gameView.quarto("AI")
+            self.done = True
+
 
     # The ia place a shape in the board
     def AIChooseCase(self):
@@ -91,7 +113,7 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
         self.currentShape.draw(surface)
         self.board[choice] = self.currentShape
         self.gameView.refresh(choice)
-        if(self.quarto()):
+        if(self.quarto(self.board)):
             #print("QUARTO! AI win the game")
             self.gameView.quarto("AI")
             #self.gameView.end()
@@ -118,13 +140,14 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
         if not self.done:
             self.playerChooseShape()
         self.inTurn = False
+        self.updateCurrentGameState()
 
     # Place the shape in the board
     def playerChooseCase(self):
         #print("Please, choose a void case in the game board")
         while(self.inTurn):
             self.gameView.waitEvent()
-            if(self.quarto()):
+            if(self.quarto(self.board)):
                 #print("QUARTO! You win the game")
                 self.gameView.quarto("YOU")
                 #self.gameView.end()
@@ -172,28 +195,25 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
                         num += 1
         
 
-    def quarto(self):
+    def quarto(self,board):
         quarto = False
         # Check rows
         for i in range(4):
-            pieces_in_row =  [self.board[i*4+j] for j in range(4) if self.board[i*4+j] is not None]
+            pieces_in_row =  [board[i*4+j] for j in range(4) if board[i*4+j] is not None]
             if len(pieces_in_row) == 4 and self.has_common_property(pieces_in_row):
                 quarto = True
         # Check columns
         for i in range(4):
-            pieces_in_col = [self.board[j*4+i] for j in range(4) if self.board[j*4+i] is not None]
+            pieces_in_col = [board[j*4+i] for j in range(4) if board[j*4+i] is not None]
             if len(pieces_in_col) == 4 and self.has_common_property(pieces_in_col):
                 quarto = True
         # Check diagonals
-        pieces_in_diag = [self.board[i] for i in range(0,16,5) if self.board[i] is not None]
+        pieces_in_diag = [board[i] for i in range(0,16,5) if board[i] is not None]
         if len(pieces_in_diag) == 4 and self.has_common_property(pieces_in_diag):
             quarto = True
-        pieces_in_diag = [self.board[i] for i in range(3, 13, 3) if self.board[i] is not None]
+        pieces_in_diag = [board[i] for i in range(3, 13, 3) if board[i] is not None]
         if len(pieces_in_diag) == 4 and self.has_common_property(pieces_in_diag):
             quarto = True
-        ## Write the winner at the end of the file
-        #if(quarto):
-        #    self.file.write(str(self.inTurn) + "\n")
 
         return quarto
     
@@ -244,4 +264,18 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
             if(pieces[i].getFilled() != filled):
                 return False
         return True
+    
+    def updateCurrentGameState(self):
+        self.currentGameState.board = self.board
+        self.currentGameState.currentShape = self.currentShape
+        self.currentGameState.alreadyTakenShape = self.alreadyTakenShape
+        self.currentGameState.inTurn = self.inTurn
+        self.currentGameState.childrens = []
+        self.currentGameState.parent = None
+        self.currentGameState.winningLeafs = []
+        self.currentGameState.losingLeafs = []
+
+
+
+
     
