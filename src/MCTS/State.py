@@ -1,22 +1,23 @@
 from Shape import Shape
 import random
+import copy
 
 class State:
-    def __init__(self, shapes:list=None, previousSelectedShape=None, state=None) -> None:
+    def __init__(self, shapes:list=None, previousSelectedShape=None) -> None:
         self.terminal = None
-        if state == None:
-            self.board = [None for i in range(16)]
-            """
-            0   1   2   3   \n
-            4   5   6   7   \n
-            8   9   10  11  \n
-            12  13  14  15
-            """
-            self.availablePos = [i for i in range(16)]
-            self.availableShapes = shapes
-            #self.alreadyTakenShapes = [False for i in range(16)]
-        else:
-            self.board, self.shapes = state.getState()
+        self.board = [None for i in range(16)]
+        """
+        0   1   2   3   \n
+        4   5   6   7   \n
+        8   9   10  11  \n
+        12  13  14  15
+        """
+        self.availablePos = [i for i in range(16)]
+        self.availableShapes = copy.deepcopy(shapes)
+        #self.shapes = self.listToDict(self.availableShapes)
+        #print(self.shapes)
+        #print(self.availableShapes)
+        #self.alreadyTakenShapes = [False for i in range(16)]
         self.previousSelectedShape = previousSelectedShape
         print(self.availablePos)
 
@@ -78,6 +79,26 @@ class State:
     def randomAction(self):
         self.randomPlaceShapeOnBoard()
         self.randomSelectShape()
+
+
+    def selectShape(self, s:int):
+        #print(self.shapes)
+        #self.previousSelectedShape = self.shapes[s]
+        for i in range(len(self.availableShapes)):
+            num = self.availableShapes[i].getNum()
+            if s == num:
+                self.previousSelectedShape = self.availableShapes[i]
+                self.availableShapes.pop(i)
+                break
+        #print(s)
+        #print(self.availableShapes)
+
+
+    def selectPos(self, pos:int):
+        self.board[pos] = self.previousSelectedShape
+        self.availablePos.remove(pos)
+        print(pos)
+        print(self.availablePos)
 
 
     def quarto(self) -> bool:
@@ -163,3 +184,10 @@ class State:
                 print("None")
             else:
                 case.print()
+
+
+    def listToDict(self, liste:list):
+        dico = {}
+        for i in range(len(liste)):
+            dico[i] = liste[i]
+        return dico

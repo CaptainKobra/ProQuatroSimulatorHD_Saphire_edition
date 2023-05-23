@@ -4,6 +4,9 @@ from Shape import Shape
 from StartWindow import StartWindow
 from gameState import gameState
 
+from MCTS.UCT import UCT
+from MCTS.State import State
+
 class GameController(GameView.GameViewListener, StartWindow.Listener):
     def __init__(self) -> None:
         self.inTurn = False
@@ -32,6 +35,8 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
         12  13  14  15
         """
         self.currentGameState = gameState(self.board, self.currentShape, self.alreadyTakenShape, self.shapes, self.inTurn)
+        self.currentStateMCTS = None
+        self.typeOfAI = "MCTS"
 
 
     def start(self):
@@ -57,13 +62,16 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
         """
         self.init()
         self.createShapes()
+        self.currentStateMCTS = State(self.shapes)
         self.gameView.drawSelectSurfaces()
 
         if(starter == "AI"):
             #Choose randomly a current shape
-            self.currentShape = self.shapes[random.randint(0, len(self.shapes) - 1)]
-            self.gameView.AIselected(self.shapes.index(self.currentShape))
-            self.alreadyTakenShape[self.shapes.index(self.currentShape)] = True
+            index = random.randint(0, len(self.shapes) - 1)
+            self.currentShape = self.shapes[index]
+            self.gameView.AIselected(index)
+            self.alreadyTakenShape[index] = True
+            self.currentStateMCTS.selectShape(index)
 
         self.play()
 
@@ -84,22 +92,37 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
     def AIplay(self):
 
         print("AI turn")
-        self.currentGameState.generateTree(1)
-        print("Tree generated")
-        # Select a random child of the root
-        self.currentGameState = self.currentGameState.childrens[random.randint(0, len(self.currentGameState.childrens) - 1)]
-        # get the position of the current shape on the new board
-        self.board = self.currentGameState.board
-        currentShapePosition = self.board.index(self.currentShape)
-        surface = self.gameView.getSurface(currentShapePosition)
-        self.currentShape.draw(surface)
-        self.gameView.refresh(currentShapePosition)
-        self.currentShape = self.currentGameState.currentShape
-        self.alreadyTakenShape = self.currentGameState.alreadyTakenShape
-        self.gameView.AIselected(self.shapes.index(self.currentShape))
-        self.inTurn = self.currentGameState.inTurn
-        
+        if self.typeOfAI == "MCTS":
+            mcts_tree = UCT(1)
+            position, shape = mcts_tree.search(self.currentStateMCTS)
+            self.currentStateMCTS.selectPos(pos=position)
 
+            surface = self.gameView.getSurface(position)
+            self.currentShape.draw(surface)
+            self.gameView.refresh(position)
+            self.board[position] = self.currentShape
+
+            self.currentShape = shape
+            index = self.currentShape.getNum()
+            self.gameView.AIselected(index)
+            self.currentStateMCTS.selectShape(shape)
+
+        else:
+            self.currentGameState.generateTree(1)
+            print("Tree generated")
+            # Select a random child of the root
+            self.currentGameState = self.currentGameState.childrens[random.randint(0, len(self.currentGameState.childrens) - 1)]
+            # get the position of the current shape on the new board
+            self.board = self.currentGameState.board
+            currentShapePosition = self.board.index(self.currentShape)
+            surface = self.gameView.getSurface(currentShapePosition)
+            self.currentShape.draw(surface)
+            self.gameView.refresh(currentShapePosition)
+            self.currentShape = self.currentGameState.currentShape
+            self.alreadyTakenShape = self.currentGameState.alreadyTakenShape
+            self.gameView.AIselected(self.shapes.index(self.currentShape))
+            self.inTurn = self.currentGameState.inTurn
+        
         if self.quarto(self.board):
             self.gameView.quarto("AI")
             self.done = True
@@ -143,6 +166,7 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
         if not self.alreadyTakenShape[shape]:
             self.alreadyTakenShape[shape] = True
             self.selected = True
+            self.currentStateMCTS.selectShape(shape)
     
 
     # Choose a shape for the ia
@@ -159,6 +183,7 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
             self.gameView.refresh(case)
             self.board[case] = self.currentShape
             self.inTurn = False
+            self.currentStateMCTS.selectPos(case)
         else:
             pass
             #print("Choose an other case")
@@ -166,7 +191,7 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
 
     def createShapes(self):
         (width, height) = self.gameView.getSizes()
-        num = 1
+        num = 0
         for size in ["little", "big"]:
             for color in ["red", "blue"]:
                 for shape in ["circle", "rect"]:

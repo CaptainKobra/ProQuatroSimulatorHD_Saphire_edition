@@ -37,6 +37,9 @@ class Shape:
     def getCaract(self):
         return (self.shape, self.color, self.size, self.filled)
     
+    def getNum(self):
+        return self.num
+    
 
     def print(self):
         print(self.num, " Shape:", self.shape, "; Color:", self.color, "; Size:", self.size, "; Filled:", self.filled)
