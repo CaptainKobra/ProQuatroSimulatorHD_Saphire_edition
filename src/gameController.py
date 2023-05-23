@@ -130,7 +130,7 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
         for choice in range(16):
             if self.board[choice] is None:
                 self.board[choice] = self.currentShape
-                score = self.minimax(self.board, False,3)
+                score = self.minimax(self.board, False, 3, True) 
                 self.board[choice] = None
 
                 if score > best_score:
@@ -148,7 +148,7 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
 
         self.inTurn = False
 
-    def minimax(self, board, is_maximizing, depth):
+    def minimax(self, board, is_maximizing, depth, playerTurn):
         if self.quarto(board):
             return 10000
         elif self.is_board_full(board):
@@ -162,7 +162,7 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
             for choice in range(16):
                 if board[choice] is None:
                     board[choice] = self.currentShape
-                    score = self.minimax(board, False, depth - 1)
+                    score = self.minimax(board, False, depth - 1, not playerTurn)  # Pour le joueur non-maximisant
                     board[choice] = None
                     best_score = max(best_score, score)
 
@@ -173,7 +173,7 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
             for choice in range(16):
                 if board[choice] is None:
                     board[choice] = self.get_next_shape()
-                    score = self.minimax(board, True, depth - 1)
+                    score = self.minimax(board, True, depth - 1, not playerTurn)  # Pour le joueur maximisant
                     board[choice] = None
                     best_score = min(best_score, score)
 
@@ -190,7 +190,7 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
             if not self.alreadyTakenShape[choice]:
                 self.alreadyTakenShape[choice] = True
                 self.currentShape = self.shapes[choice]
-                score = self.minimax(self.board, True, 3)
+                score = self.minimax(self.board, True, 3, True)
                 self.alreadyTakenShape[choice] = False
 
                 if score > best_score:
@@ -331,9 +331,16 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
     
     def evaluation(self,board,playerTurn):
         if self.quarto(board):
-            return 10000
+            if playerTurn:
+                return 1000
+            else:
+                return -1000
         else:
-            return self.connexion(self.board)
+            if playerTurn:
+                return self.connexion(board)  # Score positif pour le joueur maximisant
+            else:
+                return -1*self.connexion(board)  # Score négatif pour le joueur non-maximisant
+
 
     def connexion(self,board):
         score = 0
