@@ -52,6 +52,9 @@ class Tree:
 
 
     def generateTree(self, depth):
+        """
+        Generate the tree of all possible moves from the current state until the depth given
+        """
         if depth > 0:
             if not self.rootState.quasiTerminal():
                 possiblechildren = self.rootState.getAllPossibleChildren()
