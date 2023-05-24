@@ -83,32 +83,32 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
 
     def AIplay(self):
         print("AI turn")
-        self.currentGameState.generateTree(2)
+        self.currentGameState.generateTree(1)
         currentShapeNum = self.currentGameState.currentShape.num
         print("Tree generated")
         # Select a random child of the root
-        if self.currentGameState.winningLeafs != []:
+        if len(self.currentGameState.winningLeafs) != 0:
             self.currentGameState = self.currentGameState.winningLeafs[0]
         else:
             foundChildren = False
             for child in self.currentGameState.childrens:
                 if not child.haveLoosingChild:
+                    print("Child selected")
                     self.currentGameState = child
                     foundChildren = True
                     break
             if not foundChildren:
+                print("No non-losing child found")
                 self.currentGameState = self.currentGameState.childrens[0]
 
         # get the position of the current shape on the new board
         currentShapePosition = self.currentGameState.findPositionOnBoard(currentShapeNum)
         print(currentShapeNum)
+        print(currentShapePosition)
         self.printBoard(self.currentGameState.board)
         surface = self.gameView.getSurface(currentShapePosition)
-        self.currentGameState.currentShape.draw(surface)
+        self.currentGameState.shapes[currentShapeNum].draw(surface)
         self.gameView.refresh(currentShapePosition)
-        self.currentGameState.alreadyTakenShape = self.currentGameState.alreadyTakenShape
-        self.currentGameState.currentShape = self.currentGameState.currentShape
-        self.currentGameState.alreadyTakenShape = self.currentGameState.alreadyTakenShape
         self.gameView.AIselected(currentShapePosition)
         self.currentGameState.inTurn = self.currentGameState.inTurn
 
@@ -127,6 +127,7 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
             self.playerChooseShape()
         self.currentGameState.inTurn = False
         self.updateCurrentGameState()
+        self.printBoard(self.currentGameState.board)
 
 
     # Place the shape in the board
