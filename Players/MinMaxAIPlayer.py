@@ -3,7 +3,6 @@ from Players.AIPlayer import AIPlayer
 from gameView import GameView
 from Shape import Shape
 
-from State import State
 from MinMax.MinMaxTree import Tree
 
 
@@ -17,8 +16,6 @@ class MinMaxAIPlayer(AIPlayer):
 
 
     def play(self):
-        #print("start turn of", self.playerID)
-        #print("AD currentShape=", self.gameState.getPresiousSelectedShape().getNum())
         self.currentShape = self.gameState.getPreviousSelectedShape()
         if(self.currentShape != None):
             
@@ -49,19 +46,12 @@ class MinMaxAIPlayer(AIPlayer):
             super().play()
         else:
             self.currentShape = super().begin()
-
-
-        #print("end turn of", self.playerID)
-
-        #print("AF currentShape=", self.gameState.getPresiousSelectedShape().getNum())
     
 
     def temporisePlay(self):
-
         tree = Tree(self.gameState, True)
         tree.generateTree(1)
         self.currentShape = self.gameState.getPreviousSelectedShape()
-        #print("Tree generated")
         descisivLeafs = tree.getWinningLeafs()
         if len(descisivLeafs) > 0:
             child = descisivLeafs[0]
@@ -110,7 +100,6 @@ class MinMaxAIPlayer(AIPlayer):
         score_diag += (10**len(pieces))*self.common_properties_count(pieces)
         pieces = self.get_diag_2(board)
         score_diag += (10**len(pieces))*self.common_properties_count(pieces)
-        #print("score_diag : ",score_diag," score_col : ",score_col," score_row : ",score_row," total : ",score_diag + score_col + score_row)
         return -(score_diag + score_col + score_row)
     
 
@@ -173,8 +162,6 @@ class MinMaxAIPlayer(AIPlayer):
     def minmax(self) -> Tree:
         tree = Tree(self.gameState, True)
         tree.generateTree(self.gameState.getTurnLeft())
-        #print("Tree generated")
-
         descisivLeafs = tree.getWinningLeafs()
         if len(descisivLeafs) > 0:
             bestChild = descisivLeafs[0]
