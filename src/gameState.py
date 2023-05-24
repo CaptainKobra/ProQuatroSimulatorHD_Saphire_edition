@@ -10,6 +10,7 @@ class gameState:
         self.alreadyTakenShape = alreadyTakenShape
         self.shapes = shapes
         self.descisivLeafs = []
+        self.MinMaxValue = 0
 
 
 

@@ -84,7 +84,10 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
 
 
     def AIplay(self):
-        if self.turnsLefts > 5:
+        """
+        Ai turn where it temporise until turn 11 and then calculate the full tree and play the bests moves
+        """
+        if self.turnsLeft > 5: # play saflly
             print("AI turn")
             self.currentGameState.generateTree(1)
             currentShapeNum = self.currentGameState.currentShape.num
@@ -96,13 +99,13 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
                 self.currentGameState = self.bestChildToTemporise(self.currentGameState.childrens)
         else: #go minmax
             print("AI turn")
-            self.currentGameState.generateTree(self.turnsLefts)
+            self.currentGameState.generateTree(self.turnsLeft)
             currentShapeNum = self.currentGameState.currentShape.num
             print("Tree generated")
             # Analyse l'arbre qui va jusqu'a la fin de la partie
+            self.currentGameState = self.minmax(self.currentGameState)
 
-
-        # get the position of the current shape on the new board
+        # Refresh the gameView
         currentShapePosition = self.currentGameState.findPositionOnBoard(currentShapeNum)
         self.printBoard(self.currentGameState.board)
         surface = self.gameView.getSurface(currentShapePosition)
@@ -111,10 +114,12 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
         self.gameView.AIselected(currentShapePosition)
         self.currentGameState.inTurn = self.currentGameState.inTurn
 
+        # Check if the game is over
         if self.quarto(self.currentGameState.board):
             self.gameView.quarto("AI")
             self.done = True
         self.currentGameState.inTurn = False
+
 
     def bestChildToTemporise(self, childrens):
         """
@@ -136,8 +141,29 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
 
         return bestChild
 
+    def minmax(self, gameState):
+        for child in gameState.childrens:
+            self.generateMinMaxValues(child)
+        bestChild = gameState.childrens[0]
+        bestChildvalue = gameState.childrens[0].MinMaxValue
+        for child in gameState.childrens:
+            if child.MinMaxValue > bestChildvalue:
+                bestChild = child
+                bestChildvalue = child.MinMaxValue
+        return bestChild
 
-
+    def generateMinMaxValues(self, gameState):
+        if gameState.childrens == []:
+            if not gameState.haveDescisivChild:
+                return 0
+            elif gameState.inTurn:
+                return 1
+            else:
+                return -1
+        else:
+            for child in gameState.childrens:
+                gameState.MinMaxValue += self.generateMinMaxValues(child)
+            
     # Turn of the player
     def PlayerPlay(self):
         self.currentGameState.inTurn = True
