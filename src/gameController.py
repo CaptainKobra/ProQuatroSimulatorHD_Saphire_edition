@@ -87,19 +87,10 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
         currentShapeNum = self.currentGameState.currentShape.num
         print("Tree generated")
         # Select a random child of the root
-        if len(self.currentGameState.winningLeafs) != 0:
-            self.currentGameState = self.currentGameState.winningLeafs[0]
+        if len(self.currentGameState.descisivLeafs) != 0:
+            self.currentGameState = self.currentGameState.descisivLeafs[0]
         else:
-            foundChildren = False
-            for child in self.currentGameState.childrens:
-                if not child.haveLoosingChild:
-                    print("Child selected")
-                    self.currentGameState = child
-                    foundChildren = True
-                    break
-            if not foundChildren:
-                print("No non-losing child found")
-                self.currentGameState = self.currentGameState.childrens[0]
+            self.currentGameState = self.bestChild(self.currentGameState.childrens)
 
         # get the position of the current shape on the new board
         currentShapePosition = self.currentGameState.findPositionOnBoard(currentShapeNum)
@@ -116,6 +107,26 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
             self.gameView.quarto("AI")
             self.done = True
         self.currentGameState.inTurn = False
+
+    def bestChild(self, childrens):
+        """
+        Find the best child in the given list by using the self.connexion() function on each board child
+        It firstly try to find a child that dont have a descisiv leaf, and if it can't, it will return the child with the least descisiv leafs
+        """
+        bestChild = childrens[0]
+        bestChildConnexion = self.connexion(bestChild.board)
+        goodChildfound = False
+        for child in childrens:
+            childConnexion = self.connexion(child.board)
+            if childConnexion > bestChildConnexion and (not child.haveDescisivChild):
+                bestChild = child
+                bestChildConnexion = childConnexion
+                goodChildfound = True
+        if not goodChildfound:
+            for child in childrens:
+                if len(child.descisivLeafs) < len(bestChild.descisivLeafs):
+                    bestChild = child
+        return bestChild
 
 
     # Turn of the player
@@ -295,7 +306,7 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
         pieces = self.get_diag_2(board)
         score_diag += (10**len(pieces))*self.common_properties_count(pieces)
         print("score_diag : ",score_diag," score_col : ",score_col," score_row : ",score_row," total : ",score_diag + score_col + score_row)
-        return score_diag + score_col + score_row
+        return -(score_diag + score_col + score_row)
 
 
 
