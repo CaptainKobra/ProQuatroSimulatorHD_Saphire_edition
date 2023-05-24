@@ -165,29 +165,37 @@ class MinMaxAIPlayer(AIPlayer):
         descisivLeafs = tree.getWinningLeafs()
         if len(descisivLeafs) > 0:
             bestChild = descisivLeafs[0]
+        # Else, play the best child with minmax
         else:
             children = tree.getChildren()
             for child in children:
-                self.generateMinMaxValues(child)
+                self.generateMinMaxValues(False,child)
             bestChild = children[0]
             bestChildvalue = children[0].getMinMaxValue()
             for child in children:
                 if child.getMinMaxValue() > bestChildvalue:
                     bestChild = child
                     bestChildvalue = child.getMinMaxValue()
+            
         return bestChild
 
 
-    def generateMinMaxValues(self, tree:Tree):
-        children = tree.getChildren()
-        if len(children) > 0:
-            for child in children:
-                tree.addToMinMaxValue(self.generateMinMaxValues(child))         
-            return 0
-        else:
+    def generateMinMaxValues(self, MinMax, tree:Tree):
+        if len(tree.getChildren()) == 0:
             if not tree.haveDescisivChild():
-                return 0
+                tree.setMinMaxValue(0)
             elif tree.getInTurn():
-                return 1
+                tree.setMinMaxValue(1)
             else:
-                return -1
+                tree.setMinMaxValue(-1)
+        else:
+            MinMaxValues = []
+            for child in tree.getChildren():
+                self.generateMinMaxValues(not MinMax,child)
+                MinMaxValues.append(child.getMinMaxValue())
+            if MinMax:
+                tree.setMinMaxValue(max(MinMaxValues))
+            else:
+                tree.setMinMaxValue(min(MinMaxValues))
+
+
