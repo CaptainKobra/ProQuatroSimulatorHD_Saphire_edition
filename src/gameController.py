@@ -65,7 +65,6 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
             self.player1 = HumanPlayer(self.gameView, self.currentShape, self.shapes, self.alreadyTakenShape, self.board, "player_1", self.done)
         elif player1 == "MCTS":
             self.player1 = MCTSAIPlayer(self.gameView, self.currentShape, self.shapes, self.alreadyTakenShape, self.board, "MCTS_1", self.done)
-            self.player1.begin()
         elif player1 == "MinMax":
             # TODO
             pass
@@ -84,36 +83,18 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
 
         self.play()
 
-
-    def selectStarter(self, starter:str):
-        """
-        Sélectionne le joueur qui commence (l'utilisateur ou l'IA)
-        """
-        self.init()
-        self.currentStateMCTS = State(self.shapes)
-        self.gameView.drawSelectSurfaces(self)
-
-        if(starter == "AI"):
-            #Choose randomly a current shape
-            index = random.randint(0, len(self.shapes) - 1)
-            self.currentShape = self.shapes[index]
-            self.gameView.AIselected(index)
-            self.alreadyTakenShape[index] = True
-            #self.currentStateMCTS.selectShape(index)
-            print("select starter:", index, self.currentShape.getNum())
-
-        self.play()
-
     
     def play(self):
         """
         Boucle de jeu
         """
-        while not self.done:
+        while True:
             self.player1.play()
-            if self.done: break
+            #print("ctrl current shape=", self.gameState.getPresiousSelectedShape().getNum())
+            if self.player1.isDone(): break
             self.player2.play()
-            if self.done: break
+            #print("ctrl current shape=", self.gameState.getPresiousSelectedShape().getNum())
+            if self.player2.isDone(): break
             self.gameView.refreshAll()
         self.reset()
         

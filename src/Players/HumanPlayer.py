@@ -10,12 +10,18 @@ class HumanPlayer(Player, GameView.GameViewListener):
 
 
     def play(self):
+        #print("start turn of", self.playerID)
+        #if self.gameState.getPresiousSelectedShape() != None:
+            #print("HD current shape:", self.gameState.getPresiousSelectedShape().getNum())
+        self.currentShape = self.gameState.getPreviousSelectedShape()
         self.inTurn = True
         if(self.currentShape != None):
             self.playerChooseCase()
         if not self.done:
             self.playerChooseShape()
-        return super().play()
+        super().play()
+        #print("HF current shape:", self.gameState.getPresiousSelectedShape().getNum())
+        #print("end turn of", self.playerID)
     
 
     def playerChooseCase(self):
@@ -50,7 +56,7 @@ class HumanPlayer(Player, GameView.GameViewListener):
 
 
     def mouseClick(self, surface, case):
-        print("mouseclick")
+        #print("mouseclick")
         if(self.board[case] == None):
             self.currentShape.draw(surface)
             self.gameView.refresh(case)

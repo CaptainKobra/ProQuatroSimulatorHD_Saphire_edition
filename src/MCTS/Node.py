@@ -4,7 +4,7 @@ import random
 import math
 
 class Node:
-    def __init__(self, state:State, parent=None) -> None:
+    def __init__(self, state:State, parent=None, terminal:bool=False) -> None:
         self.state = state
         self.childeren = []
         self.parent = parent
@@ -13,6 +13,15 @@ class Node:
         self.Q = 0
         self.actionToObtain = None
         self.allPossibleChilderen = self.state.getAllPossibleChilderen()
+        self.terminal = terminal
+        #print("new node - possible childeren=", self.allPossibleChilderen)
+
+
+    def printInfoTerminal(self):
+        print("self.terminal =", self.terminal)
+        print("possible childeren=", self.allPossibleChilderen)
+        print("number of childeren =", len(self.childeren))
+        self.state.whyTerminal()
 
 
     def getN(self):
@@ -40,28 +49,37 @@ class Node:
     
 
     def isTerminal(self) -> bool:
-        return self.state.isTerminal()
+        #if val: print("node is terminal")
+        return self.state.isTerminal() or self.terminal
     
 
     def notFullyExpanded(self):
-        if len(self.allPossibleChilderen) == 0:
+        if len(self.allPossibleChilderen) > 0 or self.state.quasiTerminal():
             return True
         else:
             return False
 
 
     def addRandomChild(self):
-        if len(self.allPossibleChilderen) > 1:
+        if len(self.allPossibleChilderen) > 0:
             index = random.randint(0, len(self.allPossibleChilderen)-1)
+            selectedChild = self.allPossibleChilderen.pop(index)
+            childState = copy.deepcopy(self.state)
+            actionToObtain = childState.createChild(selectedChild)
+            if actionToObtain == None:
+                print("error : action is none")
+            child = Node(childState, self)
         else:
-            index = 0
-        selectedChild = self.allPossibleChilderen.pop(index)
-        childState = copy.deepcopy(self.state)
-        self.actionToObtain = childState.createChild(selectedChild)
-        child = Node(childState, self)
+            childState = copy.deepcopy(self.state)
+            actionToObtain = childState.createChild(None)
+            child = Node(childState, self, terminal=True)
+        child.setActionToObtain(actionToObtain)
         self.childeren.append(child)
-        #print("enfant ajouté")
         return child
+    
+
+    def setActionToObtain(self, action):
+        self.actionToObtain = action
 
 
     def getChilderen(self):
@@ -79,8 +97,3 @@ class Node:
     def print_Node(self):
         print("Node : ")
         self.state.printBoard()
-
-    
-    def whyTerminal(self):
-        self.print_Node()
-        self.state.whyTerminal()

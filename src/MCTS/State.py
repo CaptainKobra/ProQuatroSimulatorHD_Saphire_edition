@@ -27,16 +27,28 @@ class State:
 
     def getAllPossibleChilderen(self) -> list:
         allPossibleChilderen = []
-        for i in range(len(self.availablePos)):
-            for j in range(len(self.availableShapes)):
-                allPossibleChilderen.append((i, j))
+        for pos in self.availablePos:
+            for s in self.availableShapes:
+                allPossibleChilderen.append((pos, s.getNum()))
         return allPossibleChilderen
 
 
     def createChild(self, child:tuple):
-        pos = self.availablePos.pop(child[0])
-        self.board[pos] = self.previousSelectedShape
-        self.previousSelectedShape = self.availableShapes.pop(child[1])
+        if child == None:
+            if not self.quasiTerminal():
+                print("error in createChild")
+                exit()
+            else:
+                pos = self.availablePos.pop()
+                self.previousSelectedShape = None
+        else:
+            pos = child[0]
+            self.availablePos.remove(child[0])
+            self.board[pos] = self.previousSelectedShape
+            for i, s in enumerate(self.availableShapes):
+                if child[1] == s.getNum():
+                    self.previousSelectedShape = self.availableShapes.pop(i)
+                    break
         return pos, self.previousSelectedShape
 
 
@@ -53,19 +65,21 @@ class State:
 
     def randomSelectShape(self) -> Shape:
         if len(self.availableShapes) > 0:
-            shape = random.choice(self.availableShapes)
-            self.availableShapes.remove(shape)
-            self.previousSelectedShape = shape
+            self.previousSelectedShape = random.choice(self.availableShapes)
+            self.availableShapes.remove(self.previousSelectedShape)
         else:
-            shape = None
-        return shape
+            self.previousSelectedShape = None
+        return self.previousSelectedShape
     
 
     def whyTerminal(self):
         if self.endQuarto:
             print("quarto")
-        if len(self.availablePos) == 0:
-            print("no more pos available")
+        print("available pos = ", self.availablePos)
+        sh = []
+        for s in self.availableShapes:
+            sh.append(s.getNum())
+        print("available shapes = ", sh)
 
 
     def isTerminal(self) -> bool:
@@ -94,6 +108,7 @@ class State:
 
 
     def selectShape(self, s:int):
+        #print("select Shape:", s)
         #print(self.shapes)
         #self.previousSelectedShape = self.shapes[s]
         for i in range(len(self.availableShapes)):
@@ -108,10 +123,19 @@ class State:
 
 
     def selectPos(self, pos:int):
+        #print("select pos", pos)
         self.board[pos] = self.previousSelectedShape
         self.availablePos.remove(pos)
         #print(pos)
         #print(self.availablePos)
+
+
+    def getPreviousSelectedShape(self):
+        return self.previousSelectedShape
+    
+
+    def quasiTerminal(self):
+        return len(self.availablePos) == 1 and len(self.availableShapes) == 0
 
 
     def quarto(self) -> bool:

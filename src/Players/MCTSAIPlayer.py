@@ -16,21 +16,34 @@ class MCTSAIPlayer(AIPlayer):
 
 
     def play(self):
-        print("MCTS play")
-        mcts_tree = UCT(1)
-        position, shape = mcts_tree.search(self.gameState)
-        self.gameState.selectPos(pos=position)
+        #print("start turn of", self.playerID)
+        #print("AD currentShape=", self.gameState.getPresiousSelectedShape().getNum())
+        self.currentShape = self.gameState.getPreviousSelectedShape()
+        if(self.currentShape != None):
+            mcts_tree = UCT(2)
+            position, shape = mcts_tree.search(self.gameState)
+            self.gameState.selectPos(pos=position)
 
-        surface = self.gameView.getSurface(position)
-        self.currentShape.draw(surface)
-        self.gameView.refresh(position)
-        self.board[position] = self.currentShape
+            super().eraseSelectionCase()
 
-        self.currentShape = shape
-        index = self.currentShape.getNum()
-        self.gameView.AIselected(index)
-        self.gameState.selectShape(shape)
-        self.alreadyTakenShape[index] = True
-        
-        #super().play()
+            surface = self.gameView.getSurface(position)
+            self.currentShape.draw(surface)
+            self.gameView.refresh(position)
+            self.board[position] = self.currentShape
+
+            self.currentShape = shape
+            if self.currentShape == None:
+                super().equal()
+                return
+            index = self.currentShape.getNum()
+            self.gameView.AIselected(index, self)
+            self.gameState.selectShape(index)
+            self.alreadyTakenShape[index] = True
+
+            super().play()
+        else:
+            self.currentShape = super().begin()
+        #print("end turn of", self.playerID)
+
+        #print("AF currentShape=", self.gameState.getPresiousSelectedShape().getNum())
         

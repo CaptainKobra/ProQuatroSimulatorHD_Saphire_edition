@@ -16,6 +16,7 @@ class AIPlayer(Player, GameView.GameViewListener):
         self.currentShape = self.shapes[index]
         self.gameView.AIselected(index, self)
         self.alreadyTakenShape[index] = True
+        self.gameState.selectShape(index)
 
 
     def play(self):

@@ -32,6 +32,7 @@ class UCT:
         #print("nombre d'itérations:", it)
         #if self.fullyExtended:
             #print("fully extended")
+        #print("end search")
         best = self.bestChild(root, 0)
         return best.getActionToObtain()
     
@@ -41,7 +42,7 @@ class UCT:
         if node.isTerminal() and not self.error:
             self.error = True
             print("probleme in treePolicy -> node terminal")
-            node.whyTerminal()
+            node.printInfoTerminal()
         while not node.isTerminal():
             if node.notFullyExpanded():
                 return self.expand(node)
@@ -70,6 +71,9 @@ class UCT:
                 valMax = val
                 bestChild = child
         if bestChild == None:
+            print("c =", c)
+            print("is terminal ?", node.isTerminal())
+            node.printInfoTerminal()
             print(node.getChilderen())
             print("bestChild is None")
             exit()
@@ -78,6 +82,8 @@ class UCT:
 
     def customDefaultPolicy(self, node:Node):
         while not node.isTerminal():
+            if not node.notFullyExpanded():
+                break
             node = node.addRandomChild()
         reward = node.getReward()
         self.backup(node, reward)

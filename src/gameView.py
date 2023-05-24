@@ -52,7 +52,7 @@ class GameView:
 
         # Case et Surface pour la pièce choisie par l'IA
         self.selectedShapeCase = pygame.Rect(550, 60, self.width, self.height)
-        self.selectedSahpeSurface = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
+        self.selectedShapeSurface = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
 
         # Textes
         font = pygame.font.SysFont("default", 30)
@@ -68,6 +68,15 @@ class GameView:
         """
         font = pygame.font.SysFont("default", 80)
         text.writec(self.screen, font, self.colors['white'], "QUARTO! The winner is: "+winner, border=5)
+        pygame.display.flip()
+
+
+    def equal(self):
+        """
+        égalité
+        """
+        font = pygame.font.SysFont("default", 80)
+        text.writec(self.screen, font, self.colors['white'], "DRAW! There is no winner", border=5)
         pygame.display.flip()
 
 
@@ -97,7 +106,7 @@ class GameView:
                         listener.mouseClick(self.shape_surfaces[i], i)
                         self.screen.blit(self.shape_surfaces[i], rect)
                         pygame.display.flip()  # Rafraîchit l'écran
-                        self.erase(self.selectedSahpeSurface, self.selectedShapeCase)
+                        self.erase(self.selectedShapeSurface, self.selectedShapeCase)
                         break
 
 
@@ -120,9 +129,13 @@ class GameView:
                     break
 
 
+    def eraseSelectionCase(self):
+        self.erase(self.selectedShapeSurface, self.selectedShapeCase)
+
+
     def erase(self, surface, rect):
         """
-        Efface une pièce (la recouvre d'un rectangel noir, en fait)
+        Efface une pièce (la recouvre d'un rectangle noir, en fait)
         """
         pygame.draw.rect(surface, self.colors['black'], pygame.Rect(0, 0, 100, 100))
         self.screen.blit(surface, rect)
@@ -133,8 +146,8 @@ class GameView:
         """
         Dessine la pièce choisie par l'IA dans l'espace prévu
         """
-        listener.draw(self.selectedSahpeSurface, i)
-        self.screen.blit(self.selectedSahpeSurface, self.selectedShapeCase)
+        listener.draw(self.selectedShapeSurface, i)
+        self.screen.blit(self.selectedShapeSurface, self.selectedShapeCase)
         self.erase(self.selectShape_surfaces[i], self.selectCases[i])
 
 

@@ -19,9 +19,21 @@ class Player:
         self.gameState = state
 
 
+    def eraseSelectionCase(self):
+        self.gameView.eraseSelectionCase()
+
+
     def play(self):
         # etat du jeu
-        self.gameState.printBoard()
+        #self.gameState.printBoard()
         if self.gameState.quarto():
             self.gameView.quarto(self.playerID)
             self.done = True
+
+    def equal(self):
+        self.gameView.equal()
+        self.done = True
+
+
+    def isDone(self) -> bool:
+        return self.done
