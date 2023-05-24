@@ -26,13 +26,7 @@ class UCT:
         while (time.time() - startTime) < self.maxTime:
             it +=1
             node = self.treePolicy(root)
-            self.customDefaultPolicy(node)
-            #reward = self.defaultPolicy(node)
-            #self.backup(node, reward)
-        #print("nombre d'itérations:", it)
-        #if self.fullyExtended:
-            #print("fully extended")
-        #print("end search")
+            self.defaultPolicy(node)
         best = self.bestChild(root, 0)
         return best.getActionToObtain()
     
@@ -80,21 +74,13 @@ class UCT:
         return bestChild
     
 
-    def customDefaultPolicy(self, node:Node):
+    def defaultPolicy(self, node:Node):
         while not node.isTerminal():
             if not node.notFullyExpanded():
                 break
             node = node.addRandomChild()
         reward = node.getReward()
         self.backup(node, reward)
-
-
-    def defaultPolicy(self, state:State):
-        #print("defaultPolicy")
-        s = copy.deepcopy(state)
-        while not s.isTerminal():
-            state = s.randomAction()
-        return s.reward()
     
 
     def backup(self, node:Node, reward):
