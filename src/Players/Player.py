@@ -29,6 +29,8 @@ class Player:
         if self.gameState.quarto():
             self.gameView.quarto(self.playerID)
             self.done = True
+        elif self.gameState.isTerminal():
+            self.equal()
 
     def equal(self):
         self.gameView.equal()

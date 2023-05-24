@@ -20,7 +20,7 @@ class MCTSAIPlayer(AIPlayer):
         #print("AD currentShape=", self.gameState.getPresiousSelectedShape().getNum())
         self.currentShape = self.gameState.getPreviousSelectedShape()
         if(self.currentShape != None):
-            mcts_tree = UCT(2)
+            mcts_tree = UCT(3)
             position, shape = mcts_tree.search(self.gameState)
             self.gameState.selectPos(pos=position)
 

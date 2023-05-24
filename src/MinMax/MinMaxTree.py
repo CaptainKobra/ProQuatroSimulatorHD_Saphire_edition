@@ -43,7 +43,8 @@ class Tree:
         return self.MinMaxValue
     
 
-    def addToMinMaxValue(self, val):
+    def addToMinMaxValue(self, val:int):
+        print(val)
         self.MinMaxValue += val
 
 

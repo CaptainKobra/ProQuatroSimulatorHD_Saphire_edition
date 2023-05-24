@@ -10,9 +10,6 @@ class HumanPlayer(Player, GameView.GameViewListener):
 
 
     def play(self):
-        #print("start turn of", self.playerID)
-        #if self.gameState.getPresiousSelectedShape() != None:
-            #print("HD current shape:", self.gameState.getPresiousSelectedShape().getNum())
         self.currentShape = self.gameState.getPreviousSelectedShape()
         self.inTurn = True
         if(self.currentShape != None):
@@ -20,8 +17,6 @@ class HumanPlayer(Player, GameView.GameViewListener):
         if not self.done:
             self.playerChooseShape()
         super().play()
-        #print("HF current shape:", self.gameState.getPresiousSelectedShape().getNum())
-        #print("end turn of", self.playerID)
     
 
     def playerChooseCase(self):
