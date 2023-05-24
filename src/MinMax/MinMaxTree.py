@@ -47,6 +47,10 @@ class Tree:
         self.MinMaxValue += val
 
 
+    def setActionToObtain(self, action):
+        self.actionToObtain = action
+
+
     def generateTree(self, depth):
         if depth > 0:
             if not self.rootState.quasiTerminal():
@@ -54,8 +58,9 @@ class Tree:
 
                 for c in possiblechildren:
                     childState = copy.deepcopy(self.rootState)
-                    self.actionToObtain = childState.createChild(c)
+                    action = childState.createChild(c)
                     child = Tree(childState, not self.inTurn, self)
+                    child.setActionToObtain(action)
 
                     if childState.quarto():
                         self.winningLeafs.append(child)
@@ -67,8 +72,9 @@ class Tree:
                         self.children.append(child)
             else:
                 childState = copy.deepcopy(self.rootState)
-                self.actionToObtain = childState.createChild(None)
+                action= childState.createChild(None)
                 child = Tree(childState, not self.inTurn, self)
+                child.setActionToObtain(action)
                 if childState.quarto():
                     self.winningLeafs.append(child)
                     self.hasWinLeaf = True
