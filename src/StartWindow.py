@@ -38,9 +38,9 @@ class StartWindow:
         self.startButton.pack_forget()
         self.exitButton.pack_forget()
 
-        self.player1 = StringVar(self.root, "MCTS")
+        self.player1 = StringVar(self.root, "human")
         self.player1Menu = CTkOptionMenu(self.root, values=["human", "MCTS", "MinMax"], variable=self.player1)
-        self.player2 = StringVar(self.root, "MCTS")
+        self.player2 = StringVar(self.root, "MinMax")
         self.player2Menu = CTkOptionMenu(self.root, values=["human", "MCTS", "MinMax"], variable=self.player2)
         self.player1Menu.pack()
         self.player2Menu.pack()

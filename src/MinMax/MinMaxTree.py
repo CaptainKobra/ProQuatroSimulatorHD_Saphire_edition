@@ -5,61 +5,72 @@ from MCTS.State import State
 class Tree:
     def __init__(self, state:State, inTurn:bool, parent=None) -> None:
         self.rootState = state
-        self.childeren = []
-        self.loosingLeafs = []
+        self.children = []
         self.winningLeafs = []
-        self.hasLoosingChild = False
+        self.hasWinLeaf = False
         self.parent = None
         self.inTurn = inTurn
         self.actionToObtain = None
         self.parent = None
+        self.MinMaxValue = 0
+
+
+    def getInTurn(self):
+        return self.inTurn
 
 
     def getWinningLeafs(self) -> list:
         return self.winningLeafs
     
 
-    def getChilderen(self) -> list:
-        return self.childeren
+    def getChildren(self) -> list:
+        return self.children
     
 
     def getAction(self) -> tuple:
         return self.actionToObtain
     
-    def haveLoosingChild(self) -> bool:
-        return self.hasLoosingChild
+
+    def haveDescisivChild(self) -> bool:
+        return self.hasWinLeaf
+    
+
+    def getBoard(self):
+        return self.rootState.getBoard()
+    
+
+    def getMinMaxValue(self):
+        return self.MinMaxValue
+    
+
+    def addToMinMaxValue(self, val):
+        self.MinMaxValue += val
 
 
     def generateTree(self, depth):
         if depth > 0:
             if not self.rootState.quasiTerminal():
-                possibleChilderen = self.rootState.getAllPossibleChilderen()
+                possiblechildren = self.rootState.getAllPossibleChildren()
 
-                for c in possibleChilderen:
+                for c in possiblechildren:
                     childState = copy.deepcopy(self.rootState)
                     self.actionToObtain = childState.createChild(c)
                     child = Tree(childState, not self.inTurn, self)
 
                     if childState.quarto():
+                        self.winningLeafs.append(child)
+                        self.hasWinLeaf = True
                         if not self.inTurn:
-                            self.winningLeafs.append(child)
-                            break
-                        else:
-                            self.haveLoosingChild = True
-                            self.loosingLeafs.append(child)
                             break
                     else:
                         child.generateTree(depth-1)
-                        self.childeren.append(child)
+                        self.children.append(child)
             else:
                 childState = copy.deepcopy(self.rootState)
                 self.actionToObtain = childState.createChild(None)
                 child = Tree(childState, not self.inTurn, self)
                 if childState.quarto():
-                    if not self.inTurn:
-                        self.winningLeafs.append(child)
-                    else:
-                        self.haveLoosingChild = True
-                        self.loosingLeafs.append(child)
+                    self.winningLeafs.append(child)
+                    self.hasWinLeaf = True
                 else:
-                    self.childeren.append(child)
+                    self.children.append(child)

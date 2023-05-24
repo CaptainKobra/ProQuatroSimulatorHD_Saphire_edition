@@ -6,18 +6,17 @@ class gameState:
         self.board = board
         self.currentShape = currentShape
         self.inTurn = inTurn
-        self.haveLoosingChild = None
+        self.haveDescisivChild = False
         self.alreadyTakenShape = alreadyTakenShape
         self.shapes = shapes
-        self.loosingLeafs = []
-        self.winningLeafs = []
+        self.descisivLeafs = []
+        self.MinMaxValue = 0
+
 
 
     def generateTree(self ,depth):
         """
         Generate the tree of possibilities for the current game state util a given depth
-        The parameter force is used to force the generation of the tree even if a win or a lose is found
-        to avoid the case where there are no other options than loosing
         """
         self.childrens = []
         self.haveLoosingChild = False
@@ -25,7 +24,6 @@ class gameState:
         self.winningLeafs = []
         if depth >= 0:
             self.alreadyTakenShape[self.currentShape.num] = True
-
             boards =[]
             for i in range(16):
                 if self.board[i] is None:
@@ -34,6 +32,7 @@ class gameState:
                     boards.append(newBoard)
 
             for board in boards:
+                winFind = False
                 for shapeIndice in range(len(self.alreadyTakenShape)-1):
                     if not self.alreadyTakenShape[shapeIndice]:
                         newCurrentShape = self.shapes[shapeIndice]
@@ -43,16 +42,17 @@ class gameState:
                         newGameState = gameState(board, newCurrentShape, newAlreadyTakenShape, self.shapes, newInTurn, self)
 
                         if self.quarto(board):
+                            self.descisivLeafs.append(newGameState)
+                            self.haveDescisivChild = True
                             if not self.inTurn:
-                                self.winningLeafs.append(newGameState)
-                                break
-                            else:
-                                self.haveLoosingChild = True
-                                self.loosingLeafs.append(newGameState)
+                                # Stop if there is an immediate win 
+                                winFind = True
                                 break
                         else:
                             newGameState.generateTree(depth-1)
                             self.childrens.append(newGameState)
+                if winFind:
+                    break
 
                             
 
@@ -67,6 +67,7 @@ class gameState:
         print("Piece not found on board")
         return None
         
+
 
 
     def quarto(self,board):

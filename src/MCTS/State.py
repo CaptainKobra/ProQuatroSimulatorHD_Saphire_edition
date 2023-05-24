@@ -3,7 +3,7 @@ import random
 import copy
 
 class State:
-    def __init__(self, shapes:list=None, previousSelectedShape:Shape=None) -> None:
+    def __init__(self, shapes:list=None, previousSelectedShape:Shape=None, turnLeft:int=None) -> None:
         self.endQuarto = False
         self.board = [None for i in range(16)]
         """
@@ -15,24 +15,38 @@ class State:
         self.availablePos = [i for i in range(16)]
         self.availableShapes = copy.deepcopy(shapes)
         self.previousSelectedShape = previousSelectedShape
+        self.turnLeft = turnLeft
     
 
-    def getMaxNumberOfChilderen(self):
+    def decrementTurnLeft(self):
+        if self.turnLeft != None:
+            self.turnLeft -= 1
+
+
+    def getTurnLeft(self) -> int:
+        return self.turnLeft
+
+
+    def getBoard(self):
+        return self.board
+
+
+    def getMaxNumberOfChildren(self):
         """
-        Return the maximum number of childeren for this state
+        Return the maximum number of children for this state
         """
         return len(self.availablePos) * len(self.availableShapes)
     
 
-    def getAllPossibleChilderen(self) -> list:
+    def getAllPossibleChildren(self) -> list:
         """
-        Return the list of all possible childeren for this state
+        Return the list of all possible children for this state
         """
-        allPossibleChilderen = []
+        allPossibleChildren = []
         for pos in self.availablePos:
             for s in self.availableShapes:
-                allPossibleChilderen.append((pos, s.getNum()))
-        return allPossibleChilderen
+                allPossibleChildren.append((pos, s.getNum()))
+        return allPossibleChildren
 
 
     def createChild(self, child:tuple):

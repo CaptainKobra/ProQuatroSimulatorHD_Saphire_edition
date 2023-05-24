@@ -6,21 +6,21 @@ import math
 class Node:
     def __init__(self, state:State, parent=None, terminal:bool=False) -> None:
         self.state = state
-        self.childeren = []
+        self.children = []
         self.parent = parent
         self.action = []
         self.N = 0
         self.Q = 0
         self.actionToObtain = None
-        self.allPossibleChilderen = self.state.getAllPossibleChilderen()
+        self.allPossibleChildren = self.state.getAllPossibleChildren()
         self.terminal = terminal
-        #print("new node - possible childeren=", self.allPossibleChilderen)
+        #print("new node - possible children=", self.allPossibleChildren)
 
 
     def printInfoTerminal(self):
         print("self.terminal =", self.terminal)
-        print("possible childeren=", self.allPossibleChilderen)
-        print("number of childeren =", len(self.childeren))
+        print("possible children=", self.allPossibleChildren)
+        print("number of children =", len(self.children))
         self.state.whyTerminal()
 
 
@@ -59,16 +59,16 @@ class Node:
     
 
     def notFullyExpanded(self):
-        if len(self.allPossibleChilderen) > 0 or self.state.quasiTerminal():
+        if len(self.allPossibleChildren) > 0 or self.state.quasiTerminal():
             return True
         else:
             return False
 
 
     def addRandomChild(self):
-        if len(self.allPossibleChilderen) > 0:
-            index = random.randint(0, len(self.allPossibleChilderen)-1)
-            selectedChild = self.allPossibleChilderen.pop(index)
+        if len(self.allPossibleChildren) > 0:
+            index = random.randint(0, len(self.allPossibleChildren)-1)
+            selectedChild = self.allPossibleChildren.pop(index)
             childState = copy.deepcopy(self.state)
             actionToObtain = childState.createChild(selectedChild)
             if actionToObtain == None:
@@ -79,7 +79,7 @@ class Node:
             actionToObtain = childState.createChild(None)
             child = Node(childState, self, terminal=True)
         child.setActionToObtain(actionToObtain)
-        self.childeren.append(child)
+        self.children.append(child)
         return child
     
 
@@ -87,8 +87,8 @@ class Node:
         self.actionToObtain = action
 
 
-    def getChilderen(self):
-        return self.childeren
+    def getChildren(self):
+        return self.children
     
 
     def getParent(self):

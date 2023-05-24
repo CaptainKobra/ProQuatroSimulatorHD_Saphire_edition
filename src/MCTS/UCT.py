@@ -56,7 +56,7 @@ class UCT:
         #print("bestChild")
         valMax = None
         bestChild = None
-        for child in node.getChilderen():
+        for child in node.getChildren():
             Qc = child.getQ()
             Nc = child.getN()
             Nn = child.getN()
@@ -68,7 +68,7 @@ class UCT:
             print("c =", c)
             print("is terminal ?", node.isTerminal())
             node.printInfoTerminal()
-            print(node.getChilderen())
+            print(node.getChildren())
             print("bestChild is None")
             exit()
         return bestChild

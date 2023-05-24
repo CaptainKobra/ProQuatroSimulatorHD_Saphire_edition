@@ -91,7 +91,7 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
         elif player2 == "MinMax":
             self.player2 = MinMaxAIPlayer(self.gameView, self.currentShape, self.shapes, self.alreadyTakenShape, self.board, "MinMax_2", self.done)
 
-        self.gameState = State(shapes=self.shapes, previousSelectedShape=self.currentShape)
+        self.gameState = State(shapes=self.shapes, previousSelectedShape=self.currentShape, turnLeft=16)
         self.player1.setGameState(self.gameState)
         self.player2.setGameState(self.gameState)
 
@@ -104,42 +104,41 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
         """
         while True:
             self.player1.play()
+            self.gameState.decrementTurnLeft()
             #print("ctrl current shape=", self.gameState.getPresiousSelectedShape().getNum())
             if self.player1.isDone(): break
             self.player2.play()
+            self.gameState.decrementTurnLeft()
             #print("ctrl current shape=", self.gameState.getPresiousSelectedShape().getNum())
             if self.player2.isDone(): break
             self.gameView.refreshAll()
         self.reset()
 
-"""
+    """
     def AIplay(self):
-        print("AI turn")
-        self.currentGameState.generateTree(1)
-        currentShapeNum = self.currentGameState.currentShape.num
-        print("Tree generated")
-        # Select a random child of the root
-        if len(self.currentGameState.winningLeafs) != 0:
-            self.currentGameState = self.currentGameState.winningLeafs[0]
-        else:
-            foundChildren = False
-            for child in self.currentGameState.childrens:
-                if not child.haveLoosingChild:
-                    print("Child selected")
-                    self.currentGameState = child
-                    foundChildren = True
-                    break
-            if not foundChildren:
-                print("No non-losing child found")
-                self.currentGameState = self.currentGameState.childrens[0]
+        
+        #Ai turn where it temporise until turn 11 and then calculate the full tree and play the bests moves
+        
+        if self.turnsLeft > 5: # play saflly
+            print("AI turn")
+            self.currentGameState.generateTree(1)
+            currentShapeNum = self.currentGameState.currentShape.num
+            print("Tree generated")
+            # Select a random child of the root
+            if len(self.currentGameState.descisivLeafs) != 0:
+                self.currentGameState = self.currentGameState.descisivLeafs[0]
+            else:
+                self.currentGameState = self.bestChildToTemporise(self.currentGameState.childrens)
+        else: #go minmax
+            print("AI turn")
+            self.currentGameState.generateTree(self.turnsLeft)
+            currentShapeNum = self.currentGameState.currentShape.num
+            print("Tree generated")
+            # Analyse l'arbre qui va jusqu'a la fin de la partie
+            self.currentGameState = self.minmax(self.currentGameState)
 
-                
-
-
-        # get the position of the current shape on the new board
+        # Refresh the gameView
         currentShapePosition = self.currentGameState.findPositionOnBoard(currentShapeNum)
-        print(currentShapeNum)
-        print(currentShapePosition)
         self.printBoard(self.currentGameState.board)
         surface = self.gameView.getSurface(currentShapePosition)
         self.currentGameState.shapes[currentShapeNum].draw(surface)
@@ -147,11 +146,57 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
         self.gameView.AIselected(currentShapePosition)
         self.currentGameState.inTurn = self.currentGameState.inTurn
 
+        # Check if the game is over
         if self.quarto(self.currentGameState.board):
             self.gameView.quarto("AI")
             self.done = True
         self.currentGameState.inTurn = False
+    
 
+    def bestChildToTemporise(self, childrens):
+        #Retourne le meilleur enfant de la liste d'enfants "childrens"
+        bestChild = childrens[0]
+        bestChildvalue = self.connexion(bestChild.board)
+        bestChildFound = False
+        for child in childrens:
+            if self.connexion(child.board) > bestChildvalue and (not child.haveDescisivChild):
+                bestChild = child
+                bestChildvalue = self.connexion(child.board)
+                bestChildFound = True
+        if not bestChildFound:
+            for child in childrens:
+                if self.connexion(child.board) > bestChildvalue:
+                    bestChild = child
+                    bestChildvalue = self.connexion(child.board)
+        return bestChild
+
+    def minmax(self, gameState):
+        for child in gameState.childrens:
+            self.generateMinMaxValues(child)
+        bestChild = gameState.childrens[0]
+        bestChildvalue = gameState.childrens[0].MinMaxValue
+        for child in gameState.childrens:
+            if child.MinMaxValue > bestChildvalue:
+                bestChild = child
+                bestChildvalue = child.MinMaxValue
+        return bestChild
+
+    def generateMinMaxValues(self, gameState):
+        if gameState.childrens == []:
+            if not gameState.haveDescisivChild:
+                return 0
+            elif gameState.inTurn:
+                return 1
+            else:
+                return -1
+        else:
+            for child in gameState.childrens:
+                gameState.MinMaxValue += self.generateMinMaxValues(child)
+
+
+
+
+    
 
     # Turn of the player
     def PlayerPlay(self):
@@ -216,9 +261,9 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
         else:
             pass
             #print("Choose another case")
-"""
+
         
-"""
+    
     def quarto(self, board):
         quarto = False
         # Check rows
@@ -285,18 +330,13 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
         return 1
         
 
-    def evaluation(self,board,playerTurn):
+    def evaluation(self,board):
         if self.quarto(board):
-            if playerTurn:
-               return 10000
-            else:
-                return -10000
+            return 1000000
         else:
-            if playerTurn:
-                return self.connexion(board)
-            else:
-                return self.connexion(self.currentGameState.board)
+            return( -1 * self.connexion(self.currentGameState.board))
 
+    
 
     def connexion(self,board):
         score = 0
@@ -318,10 +358,8 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
         score_diag += (10**len(pieces))*self.common_properties_count(pieces)
         pieces = self.get_diag_2(board)
         score_diag += (10**len(pieces))*self.common_properties_count(pieces)
-        #print("score_diag : ",score_diag," score_col : ",score_col," score_row : ",score_row," total : ",score_diag + score_col + score_row)
-        return score_diag + score_col + score_row
-
-
+        print("score_diag : ",score_diag," score_col : ",score_col," score_row : ",score_row," total : ",score_diag + score_col + score_row)
+        return -(score_diag + score_col + score_row)
 
 
     def common_properties_count(self, shapes):
@@ -377,11 +415,11 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
                 diag.append(board[i*3+3])
         return diag    
     
+    
     def updateCurrentGameState(self):
         self.currentGameState.board = self.currentGameState.board
         self.currentGameState.currentShape = self.currentGameState.currentShape
         self.currentGameState.alreadyTakenShape = self.currentGameState.alreadyTakenShape
         self.currentGameState.inTurn = self.currentGameState.inTurn
         self.currentGameState.parent = None
-
-"""
+    """
