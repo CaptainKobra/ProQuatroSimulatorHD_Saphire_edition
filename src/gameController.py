@@ -102,7 +102,7 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
         # get the position of the current shape on the new board
         currentShapePosition = self.currentGameState.findPositionOnBoard(currentShapeNum)
         print(currentShapeNum)
-        print(self.currentGameState.board)
+        self.printBoard(self.currentGameState.board)
         surface = self.gameView.getSurface(currentShapePosition)
         self.currentGameState.currentShape.draw(surface)
         self.gameView.refresh(currentShapePosition)
@@ -116,7 +116,6 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
             self.gameView.quarto("AI")
             self.done = True
         self.currentGameState.inTurn = False
-        print(self.evaluation(self.currentGameState.board, self.currentGameState.inTurn))
 
 
     # Turn of the player
@@ -140,12 +139,19 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
                 self.gameView.quarto("YOU")
                 #self.gameView.end()
                 self.done = True
-        
-        print(self.evaluation(self.currentGameState.board, self.currentGameState.inTurn))
 
-        
-        print(self.evaluation(self.currentGameState.board, self.currentGameState.inTurn))
+    def printBoard(self,board):
+        print(self.getNumFromBoard(board,0) + "   " + self.getNumFromBoard(board,1) + "   " + self.getNumFromBoard(board,2) + "   " + self.getNumFromBoard(board,3))
+        print(self.getNumFromBoard(board,4) + "   " + self.getNumFromBoard(board,5) + "   " + self.getNumFromBoard(board,6) + "   " + self.getNumFromBoard(board,7))
+        print(self.getNumFromBoard(board,8) + "   " + self.getNumFromBoard(board,9) + "   " + self.getNumFromBoard(board,10) + "   " + self.getNumFromBoard(board,11))
+        print(self.getNumFromBoard(board,12) + "   " + self.getNumFromBoard(board,13) + "   " + self.getNumFromBoard(board,14) + "   " + self.getNumFromBoard(board,15))
 
+
+    def getNumFromBoard(self, board, indice):
+        if board[indice] == None:
+            return "*"
+        else:
+            return str(board[indice].num)
 
     def select(self, shape):
         """
@@ -178,7 +184,7 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
 
     def createShapes(self):
         (width, height) = self.gameView.getSizes()
-        num = 1
+        num = 0
         for size in ["little", "big"]:
             for color in ["red", "blue"]:
                 for shape in ["circle", "rect"]:
