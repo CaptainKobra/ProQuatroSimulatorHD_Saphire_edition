@@ -23,7 +23,6 @@ class HumanPlayer(Player, GameView.GameViewListener):
         """
         Place the shape in the board
         """
-        #print("Please, choose a void case in the game board")
         while(self.inTurn):
             self.gameView.waitEvent(self)
             if(self.gameState.quarto()):
@@ -39,25 +38,19 @@ class HumanPlayer(Player, GameView.GameViewListener):
             self.alreadyTakenShape[shape] = True
             self.selected = True
             self.gameState.selectShape(shape)
-            #print("select:", shape)
     
 
     # Choose a shape for the ia
     def playerChooseShape(self):
-        #print("choose a shape")
         self.selected = False
         while not self.selected:
             self.gameView.waitSelectEvent(self)
 
 
     def mouseClick(self, surface, case):
-        #print("mouseclick")
         if(self.board[case] == None):
             self.currentShape.draw(surface)
             self.gameView.refresh(case)
             self.board[case] = self.currentShape
             self.inTurn = False
             self.gameState.selectPos(case)
-        else:
-            pass
-            #print("Choose an other case")

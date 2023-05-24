@@ -1,7 +1,7 @@
 from gameView import GameView
 from Shape import Shape
 
-from MCTS.State import State
+from State import State
 
 class Player:
     def __init__(self, gameView:GameView, currentShape:Shape, shapes:list, alreadyTakenShape:list, board:list, playerID:str, done:bool) -> None:
@@ -24,8 +24,7 @@ class Player:
 
 
     def play(self):
-        # etat du jeu
-        #self.gameState.printBoard()
+        # state of game
         if self.gameState.quarto():
             self.gameView.quarto(self.playerID)
             self.done = True

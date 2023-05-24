@@ -54,10 +54,7 @@ class State:
         Update the state to obtain a child of the previous state
         """
         if child == None:
-            if not self.quasiTerminal():
-                print("error in createChild")
-                exit()
-            else:
+            if self.quasiTerminal():
                 pos = self.availablePos.pop()
                 self.previousSelectedShape = None
         else:
@@ -94,32 +91,6 @@ class State:
         else:
             self.previousSelectedShape = None
         return self.previousSelectedShape
-    
-
-    def whyTerminal(self):
-        """
-        Help in case of error
-        """
-        if self.endQuarto:
-            print("quarto")
-        print("available pos = ", self.availablePos)
-        sh = []
-        for s in self.availableShapes:
-            sh.append(s.getNum())
-        print("available shapes = ", sh)
-
-    
-    def printBoard(self):
-        """
-        Print the board -> help in case of error
-        """
-        print("BOARD:")
-        for i, case in enumerate(self.board):
-            print("case ", i, ":", end=" ")
-            if case == None:
-                print("None")
-            else:
-                case.print()
 
 
     def isTerminal(self) -> bool:
@@ -226,7 +197,6 @@ class State:
     def sameSize(self, pieces):
         size = pieces[0].getSize()
         for i in range(1,4):
-            #print(size, "   ", pieces[i].getSize())
             if(pieces[i].getSize() != size):
                 return False
         return True
@@ -235,7 +205,6 @@ class State:
     def sameShape(self, pieces):
         shape = pieces[0].getShape()
         for i in range(1,4):
-            #print(shape, "   ", pieces[i].getShape())
             if(pieces[i].getShape() != shape):
                 return False
         return True
@@ -244,7 +213,6 @@ class State:
     def sameColor(self, pieces):
         color = pieces[0].getColor()
         for i in range(1,4):
-            #print(color, "   ", pieces[i].getColor())
             if(pieces[i].getColor() != color):
                 return False
         return True
@@ -253,7 +221,6 @@ class State:
     def sameFilled(self, pieces):
         filled = pieces[0].getFilled()
         for i in range(1,4):
-            #print(filled, "   ", pieces[i].getFilled())
             if(pieces[i].getFilled() != filled):
                 return False
         return True

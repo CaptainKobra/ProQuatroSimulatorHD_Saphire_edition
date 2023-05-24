@@ -1,5 +1,4 @@
 import pygame
-from pygame.locals import *
 from pgu import text
 
 class GameView:
@@ -85,7 +84,6 @@ class GameView:
     
 
     def getSurface(self, i):
-        print(i)
         return self.shape_surfaces[i]
 
 

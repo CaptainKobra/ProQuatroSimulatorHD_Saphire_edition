@@ -1,5 +1,5 @@
 import copy
-from MCTS.State import State
+from State import State
 
 
 class Tree:
@@ -44,7 +44,6 @@ class Tree:
     
 
     def addToMinMaxValue(self, val:int):
-        print(val)
         self.MinMaxValue += val
 
 

@@ -3,7 +3,7 @@ from Players.AIPlayer import AIPlayer
 from gameView import GameView
 from Shape import Shape
 
-from MCTS.State import State
+from State import State
 from MCTS.UCT import UCT
 
 class MCTSAIPlayer(AIPlayer):
@@ -16,8 +16,6 @@ class MCTSAIPlayer(AIPlayer):
 
 
     def play(self):
-        #print("start turn of", self.playerID)
-        #print("AD currentShape=", self.gameState.getPresiousSelectedShape().getNum())
         self.currentShape = self.gameState.getPreviousSelectedShape()
         if(self.currentShape != None):
             mcts_tree = UCT(3)
@@ -43,7 +41,4 @@ class MCTSAIPlayer(AIPlayer):
             super().play()
         else:
             self.currentShape = super().begin()
-        #print("end turn of", self.playerID)
-
-        #print("AF currentShape=", self.gameState.getPresiousSelectedShape().getNum())
         
