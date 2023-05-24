@@ -3,10 +3,8 @@ from Players.AIPlayer import AIPlayer
 from gameView import GameView
 from Shape import Shape
 
-from MCTS.State import State
+from State import State
 from MinMax.MinMaxTree import Tree
-
-import random
 
 
 class MinMaxAIPlayer(AIPlayer):
@@ -63,7 +61,7 @@ class MinMaxAIPlayer(AIPlayer):
         tree = Tree(self.gameState, True)
         tree.generateTree(1)
         self.currentShape = self.gameState.getPreviousSelectedShape()
-        print("Tree generated")
+        #print("Tree generated")
         descisivLeafs = tree.getWinningLeafs()
         if len(descisivLeafs) > 0:
             child = descisivLeafs[0]
@@ -175,7 +173,7 @@ class MinMaxAIPlayer(AIPlayer):
     def minmax(self) -> Tree:
         tree = Tree(self.gameState, True)
         tree.generateTree(self.gameState.getTurnLeft())
-        print("Tree generated")
+        #print("Tree generated")
 
         # If there is a winning leaf, play it
         descisivLeafs = tree.getWinningLeafs()

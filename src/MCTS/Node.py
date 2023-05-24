@@ -1,7 +1,6 @@
-from MCTS.State import State
+from State import State
 import copy
 import random
-import math
 
 class Node:
     def __init__(self, state:State, parent=None, terminal:bool=False) -> None:
@@ -14,14 +13,6 @@ class Node:
         self.actionToObtain = None
         self.allPossibleChildren = self.state.getAllPossibleChildren()
         self.terminal = terminal
-        #print("new node - possible children=", self.allPossibleChildren)
-
-
-    def printInfoTerminal(self):
-        print("self.terminal =", self.terminal)
-        print("possible children=", self.allPossibleChildren)
-        print("number of children =", len(self.children))
-        self.state.whyTerminal()
 
 
     def getN(self):
@@ -71,8 +62,6 @@ class Node:
             selectedChild = self.allPossibleChildren.pop(index)
             childState = copy.deepcopy(self.state)
             actionToObtain = childState.createChild(selectedChild)
-            if actionToObtain == None:
-                print("error : action is none")
             child = Node(childState, self)
         else:
             childState = copy.deepcopy(self.state)
@@ -97,8 +86,3 @@ class Node:
 
     def getReward(self):
         return self.state.reward()
-
-
-    def print_Node(self):
-        print("Node : ")
-        self.state.printBoard()

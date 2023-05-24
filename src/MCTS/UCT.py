@@ -1,9 +1,7 @@
 from MCTS.Node import Node
-from MCTS.State import State
+from State import State
 import time
 import math
-import copy
-import random
 
 class UCT:
     def __init__(self, maxTime:float) -> None:
@@ -13,12 +11,10 @@ class UCT:
         self.Q = {}
         self.Cp = 1/math.sqrt(2) # TODO à ajuster, éventuellement de manière dynamique selon l'étape du jeu
         self.fullyExtended = False
-        self.error = False
         self.currentNode = None
 
 
     def search(self, currentState):
-        #print("search")
         startTime = time.time()
         root = Node(currentState)
         self.fullyExtended = False
@@ -32,11 +28,6 @@ class UCT:
     
 
     def treePolicy(self, node:Node):
-        #print("treePolicy")
-        if node.isTerminal() and not self.error:
-            self.error = True
-            print("probleme in treePolicy -> node terminal")
-            node.printInfoTerminal()
         while not node.isTerminal():
             if node.notFullyExpanded():
                 return self.expand(node)
@@ -47,13 +38,11 @@ class UCT:
     
 
     def expand(self, node:Node):
-        #print("expand")
         child = node.addRandomChild()
         return child
     
 
     def bestChild(self, node:Node, c) -> Node:
-        #print("bestChild")
         valMax = None
         bestChild = None
         for child in node.getChildren():
@@ -64,13 +53,6 @@ class UCT:
             if valMax == None or val > valMax:
                 valMax = val
                 bestChild = child
-        if bestChild == None:
-            print("c =", c)
-            print("is terminal ?", node.isTerminal())
-            node.printInfoTerminal()
-            print(node.getChildren())
-            print("bestChild is None")
-            exit()
         return bestChild
     
 
@@ -84,7 +66,6 @@ class UCT:
     
 
     def backup(self, node:Node, reward):
-        #print("backup")
         while node != None:
             node.addToN(1)
             node.addToQ(reward)

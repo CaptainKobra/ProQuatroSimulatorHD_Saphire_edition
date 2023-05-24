@@ -39,10 +39,6 @@ class Shape:
     
     def getNum(self):
         return self.num
-    
-
-    def print(self):
-        print(self.num, " Shape:", self.shape, "; Color:", self.color, "; Size:", self.size, "; Filled:", self.filled)
 
 
     def draw(self, surface):

@@ -1,5 +1,5 @@
 import copy
-from MCTS.State import State
+from State import State
 
 
 class Tree:
