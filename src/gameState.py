@@ -139,11 +139,3 @@ class gameState:
             if(pieces[i].getFilled() != filled):
                 return False
         return True
-
-
-
-
-    
-    
-
-    

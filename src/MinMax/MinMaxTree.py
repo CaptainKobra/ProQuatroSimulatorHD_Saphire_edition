@@ -43,8 +43,8 @@ class Tree:
         return self.MinMaxValue
     
 
-    def addToMinMaxValue(self, val):
-        self.MinMaxValue += val
+    def setMinMaxValue(self, val):
+        self.MinMaxValue = val
 
 
     def setActionToObtain(self, action):
