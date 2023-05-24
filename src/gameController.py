@@ -9,12 +9,14 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
         self.inTurn = False
         self.AIturn = False
         self.done = False
+        self.turnsLeft = 16
 
 
     def reset(self):
         self.inTurn = False
         self.AIturn = False
         self.done = False
+        self.turnsLeft = 16
         self.start()
 
 
@@ -82,15 +84,23 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
 
 
     def AIplay(self):
-        print("AI turn")
-        self.currentGameState.generateTree(1)
-        currentShapeNum = self.currentGameState.currentShape.num
-        print("Tree generated")
-        # Select a random child of the root
-        if len(self.currentGameState.descisivLeafs) != 0:
-            self.currentGameState = self.currentGameState.descisivLeafs[0]
-        else:
-            self.currentGameState = self.bestChild(self.currentGameState.childrens)
+        if self.turnsLefts > 5:
+            print("AI turn")
+            self.currentGameState.generateTree(1)
+            currentShapeNum = self.currentGameState.currentShape.num
+            print("Tree generated")
+            # Select a random child of the root
+            if len(self.currentGameState.descisivLeafs) != 0:
+                self.currentGameState = self.currentGameState.descisivLeafs[0]
+            else:
+                self.currentGameState = self.bestChildToTemporise(self.currentGameState.childrens)
+        else: #go minmax
+            print("AI turn")
+            self.currentGameState.generateTree(self.turnsLefts)
+            currentShapeNum = self.currentGameState.currentShape.num
+            print("Tree generated")
+            # Analyse l'arbre qui va jusqu'a la fin de la partie
+
 
         # get the position of the current shape on the new board
         currentShapePosition = self.currentGameState.findPositionOnBoard(currentShapeNum)
@@ -106,29 +116,26 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
             self.done = True
         self.currentGameState.inTurn = False
 
-    def bestChild(self, childrens, depth=1):
+    def bestChildToTemporise(self, childrens):
+        """
+        Retourne le meilleur enfant de la liste d'enfants "childrens"
+        """
         bestChild = childrens[0]
-        bestScore = self.childScore(bestChild, depth)
+        bestChildvalue = self.connexion(bestChild.board)
+        bestChildFound = False
         for child in childrens:
-            score = self.childScore(child, depth)
-            if score > bestScore:
+            if self.connexion(child.board) > bestChildvalue and (not child.haveDescisivChild):
                 bestChild = child
-                bestScore = score
+                bestChildvalue = self.connexion(child.board)
+                bestChildFound = True
+        if not bestChildFound:
+            for child in childrens:
+                if self.connexion(child.board) > bestChildvalue:
+                    bestChild = child
+                    bestChildvalue = self.connexion(child.board)
+
         return bestChild
-        
-    def childScore(self, child, depth):
-        """
-        Determine the score of a child taking to account the average of the score of its childrens
-        """
-        if depth == 0:
-            return self.evaluation(child.board)
-        score = 0
-        for child in child.childrens:
-            score += self.childScore(child, depth-1)
-        numberOfChild = len(child.childrens)
-        if numberOfChild == 0:
-            return 0
-        return score/len(child.childrens)
+
 
 
     # Turn of the player
@@ -278,7 +285,7 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
         if self.quarto(board):
             return 1000000
         else:
-            return self.connexion(self.currentGameState.board)
+            return( -1 * self.connexion(self.currentGameState.board))
 
 
     def connexion(self,board):
@@ -302,9 +309,7 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
         pieces = self.get_diag_2(board)
         score_diag += (10**len(pieces))*self.common_properties_count(pieces)
         print("score_diag : ",score_diag," score_col : ",score_col," score_row : ",score_row," total : ",score_diag + score_col + score_row)
-        return score_diag + score_col + score_row
-
-
+        return -(score_diag + score_col + score_row)
 
 
     def common_properties_count(self, shapes):
