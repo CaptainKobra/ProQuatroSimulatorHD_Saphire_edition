@@ -6,7 +6,7 @@ import copy
 import random
 
 class UCT:
-    def __init__(self, maxTime:float) -> None:
+    def __init__(self, maxTime) -> None:
         self.maxTime = maxTime
         self.action = {}
         self.N = {}
@@ -14,7 +14,6 @@ class UCT:
         self.Cp = 1/math.sqrt(2) # TODO à ajuster, éventuellement de manière dynamique selon l'étape du jeu
         self.fullyExtended = False
         self.error = False
-        self.currentNode = None
 
 
     def search(self, currentState):
@@ -26,12 +25,9 @@ class UCT:
         while (time.time() - startTime) < self.maxTime:
             it +=1
             node = self.treePolicy(root)
-            self.customDefaultPolicy(node)
-            #reward = self.defaultPolicy(node)
-            #self.backup(node, reward)
+            reward = self.defaultPolicy(node.getState())
+            self.backup(node, reward)
         #print("nombre d'itérations:", it)
-        #if self.fullyExtended:
-            #print("fully extended")
         best = self.bestChild(root, 0)
         return best.getActionToObtain()
     
@@ -46,7 +42,6 @@ class UCT:
             if node.notFullyExpanded():
                 return self.expand(node)
             else:
-                self.fullyExtended = True
                 node = self.bestChild(node, self.Cp)
         return node
     
@@ -75,13 +70,6 @@ class UCT:
             exit()
         return bestChild
     
-
-    def customDefaultPolicy(self, node:Node):
-        while not node.isTerminal():
-            node = node.addRandomChild()
-        reward = node.getReward()
-        self.backup(node, reward)
-
 
     def defaultPolicy(self, state:State):
         #print("defaultPolicy")

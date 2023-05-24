@@ -1,8 +1,8 @@
-from customtkinter import (CTk, CTkLabel, CTkButton, StringVar, CTkOptionMenu)
+from customtkinter import (CTk, CTkLabel, CTkButton, StringVar)
 
 class StartWindow:
     class Listener:
-        def selectPlayers(self, player1:str, player2:str):
+        def selectStarter(self, starter:str):
             pass
 
     def __init__(self) -> None:
@@ -34,27 +34,21 @@ class StartWindow:
 
 
     def onButton1Click(self):
-        self.textLabel.set("Select players")
-        self.startButton.pack_forget()
-        self.exitButton.pack_forget()
+        if self.texButton1.get() == "Start":
+            self.textLabel.set("Who Starts ?")
+            self.texButton1.set("Me")
+            self.texButton2.set("AI")
+        else:
+            self.root.destroy()
+            self.listener.selectStarter("player")
 
-        self.player1 = StringVar(self.root, "human")
-        self.player1Menu = CTkOptionMenu(self.root, values=["human", "MCTS", "MinMax"], variable=self.player1)
-        self.player2 = StringVar(self.root, "MCTS")
-        self.player2Menu = CTkOptionMenu(self.root, values=["human", "MCTS", "MinMax"], variable=self.player2)
-        self.player1Menu.pack()
-        self.player2Menu.pack()
-
-        self.confirmButton = CTkButton(self.root, text="Confirm", command=self.onButtonConfirmClick)
-        self.confirmButton.pack()
-
-
-    def onButtonConfirmClick(self):
-        self.root.destroy()
-        self.listener.selectPlayers(self.player1.get(), self.player2.get())
 
     def onButton2Click(self):
-        exit(0)
+        if self.texButton2.get() == "Exit":
+            exit(0)
+        else:
+            self.root.destroy()
+            self.listener.selectStarter("AI")
             
 
 """

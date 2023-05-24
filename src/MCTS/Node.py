@@ -12,6 +12,7 @@ class Node:
         self.N = 0
         self.Q = 0
         self.actionToObtain = None
+        self.allPossibleChilderen = self.state.getAllPossibleChilderen()
 
 
     def getN(self):
@@ -32,10 +33,6 @@ class Node:
 
     def getState(self):
         return self.state
-    
-
-    def setActionToObtain(self, action):
-        self.actionToObtain = action
 
 
     def getActionToObtain(self):
@@ -47,47 +44,24 @@ class Node:
     
 
     def notFullyExpanded(self):
-        if len(self.childeren) < 256:
+        if len(self.allPossibleChilderen) == 0:
             return True
         else:
             return False
 
 
     def addRandomChild(self):
-        copyState = copy.deepcopy(self.state)
-        pos = copyState.randomPlaceShapeOnBoard()
-        selectedShape = copyState.randomSelectShape()
-        action = (pos, selectedShape)
-        child = Node(copyState, self)
+        if len(self.allPossibleChilderen) > 1:
+            index = random.randint(0, len(self.allPossibleChilderen)-1)
+        else:
+            index = 0
+        selectedChild = self.allPossibleChilderen.pop(index)
+        childState = copy.deepcopy(self.state)
+        self.actionToObtain = childState.createChild(selectedChild)
+        child = Node(childState, self)
         self.childeren.append(child)
-        return child, action
-
-        """"
-        action = self.selectAction()
-        i = math.floor(action/16)
-        j = action%16
-        copyState = copy.deepcopy(self.state)
-        while not copyState.placeShapeOnBoard(i, j):
-            action = self.selectAction()
-            i = math.floor(action/16)
-            j = action%16
-        child = Node(copyState, self)
-        self.action.append(action)
-        self.childeren.append(child)
-        return child, action
-        """
-    """
-    def selectAction(self):
-        action = random.randint(0,255)
-        while True:
-            try:
-                self.action.index(action)
-            except:
-                break
-            else:
-                action = random.randint(0,255)
-        return action
-    """
+        #print("enfant ajouté")
+        return child
 
 
     def getChilderen(self):
@@ -96,8 +70,17 @@ class Node:
 
     def getParent(self):
         return self.parent
+    
+
+    def getReward(self):
+        return self.state.reward()
 
 
     def print_Node(self):
         print("Node : ")
         self.state.printBoard()
+
+    
+    def whyTerminal(self):
+        self.print_Node()
+        self.state.whyTerminal()

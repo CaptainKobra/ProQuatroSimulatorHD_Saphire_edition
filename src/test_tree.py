@@ -1,7 +1,6 @@
 from Shape import Shape
-from tree.MinMaxTree import MinMaxTree
 import time
-from MCTS.UCT import UCT
+from MCTS.UCT_fromRef import UCT
 from MCTS.State import State
 import random
 

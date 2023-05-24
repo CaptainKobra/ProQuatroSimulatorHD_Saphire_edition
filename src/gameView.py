@@ -13,7 +13,6 @@ class GameView:
             pass
 
     def __init__(self) -> None:
-        self.listener = None
         pygame.init()
         self.screen = pygame.display.set_mode((1000, 700))
 
@@ -63,10 +62,6 @@ class GameView:
         pygame.display.flip()  # Rafraîchit l'écran
 
 
-    def setListener(self, l:GameViewListener):
-        self.listener = l
-
-
     def quarto(self, winner:str):
         """
         Affiche le vainqueur
@@ -84,11 +79,11 @@ class GameView:
         return self.shape_surfaces[i]
 
 
-    def waitEvent(self):
+    def waitEvent(self, listener:GameViewListener):
         """
         Attend que l'utilisateur choisisse une case où placer la pièce
         """
-        pygame.event.clear()
+        #pygame.event.clear()
         event = pygame.event.wait(1000000)
         #self.app.event(event)
         if event.type == pygame.QUIT:
@@ -99,14 +94,14 @@ class GameView:
                 if rect.collidepoint(event.pos):
                     # La souris est dans cette case
                     if not self.shape_surfaces[i].get_at((0, 0))[3]:
-                        self.listener.mouseClick(self.shape_surfaces[i], i)
+                        listener.mouseClick(self.shape_surfaces[i], i)
                         self.screen.blit(self.shape_surfaces[i], rect)
                         pygame.display.flip()  # Rafraîchit l'écran
                         self.erase(self.selectedSahpeSurface, self.selectedShapeCase)
                         break
 
 
-    def waitSelectEvent(self):
+    def waitSelectEvent(self, listener:GameViewListener):
         """
         Attend que l'utilisateur sélectionne une pièce
         """
@@ -119,7 +114,7 @@ class GameView:
             for i, rect in enumerate(self.selectCases):
                 if rect.collidepoint(event.pos):
                     # La souris est dans cette case
-                    self.listener.select(i)
+                    listener.select(i)
                     self.erase(self.selectShape_surfaces[i], rect)
                     pygame.display.flip()  # Rafraîchit l'écran
                     break
@@ -134,21 +129,21 @@ class GameView:
         pygame.display.flip()
 
 
-    def AIselected(self, i:int):
+    def AIselected(self, i:int, listener:GameViewListener):
         """
         Dessine la pièce choisie par l'IA dans l'espace prévu
         """
-        self.listener.draw(self.selectedSahpeSurface, i)
+        listener.draw(self.selectedSahpeSurface, i)
         self.screen.blit(self.selectedSahpeSurface, self.selectedShapeCase)
         self.erase(self.selectShape_surfaces[i], self.selectCases[i])
 
 
-    def drawSelectSurfaces(self):
+    def drawSelectSurfaces(self, listener:GameViewListener):
         """
         Dessine toutes les pièces disponibles (appelé une seule fois, avant le début de la partie)
         """
         for i, rect in enumerate(self.selectCases):
-            self.listener.draw(self.selectShape_surfaces[i], i)
+            listener.draw(self.selectShape_surfaces[i], i)
             self.screen.blit(self.selectShape_surfaces[i], rect)
         pygame.display.flip()
 

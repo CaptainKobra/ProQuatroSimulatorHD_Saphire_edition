@@ -4,7 +4,7 @@ import copy
 
 class State:
     def __init__(self, shapes:list=None, previousSelectedShape=None) -> None:
-        self.terminal = None
+        self.endQuarto = False
         self.board = [None for i in range(16)]
         """
         0   1   2   3   \n
@@ -19,12 +19,26 @@ class State:
         #print(self.availableShapes)
         #self.alreadyTakenShapes = [False for i in range(16)]
         self.previousSelectedShape = previousSelectedShape
-        print(self.availablePos)
-
-
-    def getState(self):
-        return self.board, self.shapes
     
+
+    def getMaxNumberOfChilderen(self):
+        return len(self.availablePos) * len(self.availableShapes)
+    
+
+    def getAllPossibleChilderen(self) -> list:
+        allPossibleChilderen = []
+        for i in range(len(self.availablePos)):
+            for j in range(len(self.availableShapes)):
+                allPossibleChilderen.append((i, j))
+        return allPossibleChilderen
+
+
+    def createChild(self, child:tuple):
+        pos = self.availablePos.pop(child[0])
+        self.board[pos] = self.previousSelectedShape
+        self.previousSelectedShape = self.availableShapes.pop(child[1])
+        return pos, self.previousSelectedShape
+
 
     def randomPlaceShapeOnBoard(self) -> int:
         if len(self.availablePos) > 0:
@@ -45,33 +59,31 @@ class State:
         else:
             shape = None
         return shape
+    
 
-
-    """
-    def placeShapeOnBoard(self, shape:int, pos:int) -> bool:
-        if not self.alreadyTakenShapes[shape] and self.board[pos] == None:
-            self.alreadyTakenShapes[shape] = True
-            self.board[pos] = self.shapes[shape]
-            return True
-        return False
-    """
+    def whyTerminal(self):
+        if self.endQuarto:
+            print("quarto")
+        if len(self.availablePos) == 0:
+            print("no more pos available")
 
 
     def isTerminal(self) -> bool:
         if self.quarto():
-            self.terminal = True
+            self.endQuarto = True
+            terminal = True
         else:
             if len(self.availablePos) == 0:
-                self.terminal = True
+                terminal = True
                 #print(self.terminal)
             else:
-                self.terminal = False
-        return self.terminal
+                terminal = False
+        return terminal
     
 
     def reward(self):
-        if self.quarto():
-            return 100
+        if self.endQuarto:
+            return 1
         else:
             return 0
         
@@ -85,20 +97,21 @@ class State:
         #print(self.shapes)
         #self.previousSelectedShape = self.shapes[s]
         for i in range(len(self.availableShapes)):
+            #print(i, end=" ")
             num = self.availableShapes[i].getNum()
             if s == num:
                 self.previousSelectedShape = self.availableShapes[i]
                 self.availableShapes.pop(i)
                 break
-        #print(s)
+        #print(" s:", s)
         #print(self.availableShapes)
 
 
     def selectPos(self, pos:int):
         self.board[pos] = self.previousSelectedShape
         self.availablePos.remove(pos)
-        print(pos)
-        print(self.availablePos)
+        #print(pos)
+        #print(self.availablePos)
 
 
     def quarto(self) -> bool:
@@ -178,6 +191,7 @@ class State:
 
 
     def printBoard(self):
+        print("BOARD:")
         for i, case in enumerate(self.board):
             print("case ", i, ":", end=" ")
             if case == None:
