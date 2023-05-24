@@ -43,7 +43,7 @@ class gameState:
                         newGameState = gameState(board, newCurrentShape, newAlreadyTakenShape, self.shapes, newInTurn, self)
 
                         if self.quarto(board):
-                            if self.inTurn:
+                            if not self.inTurn:
                                 self.winningLeafs.append(newGameState)
                                 break
                             else:
