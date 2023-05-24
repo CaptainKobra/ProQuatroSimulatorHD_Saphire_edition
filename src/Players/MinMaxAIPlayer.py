@@ -48,7 +48,7 @@ class MinMaxAIPlayer(AIPlayer):
             self.gameState.selectShape(index)
             self.alreadyTakenShape[index] = True
 
-
+            super().play()
         else:
             self.currentShape = super().begin()
 
