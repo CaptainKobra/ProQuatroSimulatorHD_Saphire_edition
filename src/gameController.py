@@ -94,8 +94,6 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
 
         # get the position of the current shape on the new board
         currentShapePosition = self.currentGameState.findPositionOnBoard(currentShapeNum)
-        print(currentShapeNum)
-        print(currentShapePosition)
         self.printBoard(self.currentGameState.board)
         surface = self.gameView.getSurface(currentShapePosition)
         self.currentGameState.shapes[currentShapeNum].draw(surface)
@@ -108,25 +106,29 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
             self.done = True
         self.currentGameState.inTurn = False
 
-    def bestChild(self, childrens):
-        """
-        Find the best child in the given list by using the self.connexion() function on each board child
-        It firstly try to find a child that dont have a descisiv leaf, and if it can't, it will return the child with the least descisiv leafs
-        """
+    def bestChild(self, childrens, depth=1):
         bestChild = childrens[0]
-        bestChildConnexion = self.connexion(bestChild.board)
-        goodChildfound = False
+        bestScore = self.childScore(bestChild, depth)
         for child in childrens:
-            childConnexion = self.connexion(child.board)
-            if childConnexion > bestChildConnexion and (not child.haveDescisivChild):
+            score = self.childScore(child, depth)
+            if score > bestScore:
                 bestChild = child
-                bestChildConnexion = childConnexion
-                goodChildfound = True
-        if not goodChildfound:
-            for child in childrens:
-                if len(child.descisivLeafs) < len(bestChild.descisivLeafs):
-                    bestChild = child
+                bestScore = score
         return bestChild
+        
+    def childScore(self, child, depth):
+        """
+        Determine the score of a child taking to account the average of the score of its childrens
+        """
+        if depth == 0:
+            return self.evaluation(child.board)
+        score = 0
+        for child in child.childrens:
+            score += self.childScore(child, depth-1)
+        numberOfChild = len(child.childrens)
+        if numberOfChild == 0:
+            return 0
+        return score/len(child.childrens)
 
 
     # Turn of the player
@@ -272,17 +274,11 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
         return 1
         
 
-    def evaluation(self,board,playerTurn):
+    def evaluation(self,board):
         if self.quarto(board):
-            if playerTurn:
-               return 10000
-            else:
-                return -10000
+            return 1000000
         else:
-            if playerTurn:
-                return self.connexion(board)
-            else:
-                return self.connexion(self.currentGameState.board)
+            return self.connexion(self.currentGameState.board)
 
 
     def connexion(self,board):
@@ -306,7 +302,7 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
         pieces = self.get_diag_2(board)
         score_diag += (10**len(pieces))*self.common_properties_count(pieces)
         print("score_diag : ",score_diag," score_col : ",score_col," score_row : ",score_row," total : ",score_diag + score_col + score_row)
-        return -(score_diag + score_col + score_row)
+        return score_diag + score_col + score_row
 
 
 
