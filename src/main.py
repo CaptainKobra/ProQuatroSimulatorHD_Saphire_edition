@@ -1,4 +1,4 @@
-from gameController import GameController
+from gameController_vp import GameController
 
 if __name__ == '__main__':
     mainController = GameController()
