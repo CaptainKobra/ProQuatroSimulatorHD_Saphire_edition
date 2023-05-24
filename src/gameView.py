@@ -81,6 +81,7 @@ class GameView:
     
 
     def getSurface(self, i):
+        print(i)
         return self.shape_surfaces[i]
 
 

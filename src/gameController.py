@@ -21,17 +21,17 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
     def init(self):
         self.gameView = GameView()
         self.gameView.setListener(self)
-        self.shapes = []
-        self.currentShape = None
-        self.alreadyTakenShape = [False for i in range(16)]
-        self.board = [None for i in range(16)]
+        shapes = []
+        currentShape = None
+        alreadyTakenShape = [False for i in range(16)]
+        board = [None for i in range(16)]
         """
         0   1   2   3   \n
         4   5   6   7   \n
         8   9   10  11  \n
         12  13  14  15
         """
-        self.currentGameState = gameState(self.board, self.currentShape, self.alreadyTakenShape, self.shapes, self.inTurn)
+        self.currentGameState = gameState(board, currentShape, alreadyTakenShape, shapes, self.inTurn)
 
 
     def start(self):
@@ -47,7 +47,7 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
         """
         Dessine la forme d'index "case" dans la surface "surface"
         """
-        self.shapes[case].draw(surface)
+        self.currentGameState.shapes[case].draw(surface)
 
 
     def selectStarter(self, starter: str):
@@ -61,9 +61,9 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
 
         if(starter == "AI"):
             #Choose randomly a current shape
-            self.currentShape = self.shapes[random.randint(0, len(self.shapes) - 1)]
-            self.gameView.AIselected(self.shapes.index(self.currentShape))
-            self.alreadyTakenShape[self.shapes.index(self.currentShape)] = True
+            self.currentGameState.currentShape = self.currentGameState.shapes[0]
+            self.gameView.AIselected(self.currentGameState.shapes.index(self.currentGameState.currentShape))
+            self.currentGameState.alreadyTakenShape[self.currentGameState.currentShape.num] = True
 
         self.play()
 
@@ -82,68 +82,78 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
 
 
     def AIplay(self):
-
         print("AI turn")
-        self.currentGameState.generateTree(1)
+        self.currentGameState.generateTree(2)
+        currentShapeNum = self.currentGameState.currentShape.num
         print("Tree generated")
         # Select a random child of the root
         if self.currentGameState.winningLeafs != []:
             self.currentGameState = self.currentGameState.winningLeafs[0]
         else:
-            self.currentGameState = self.currentGameState.childrens[random.randint(0, len(self.currentGameState.childrens) - 1)]
-        # get the position of the current shape on the new board
-        self.board = self.currentGameState.board
-        currentShapePosition = self.board.index(self.currentShape)
-        surface = self.gameView.getSurface(currentShapePosition)
-        self.currentShape.draw(surface)
-        self.gameView.refresh(currentShapePosition)
-        self.alreadyTakenShape = self.curr
-        self.currentShape = self.currentGameState.currentShape
-        self.alreadyTakenShape = self.currentGameState.alreadyTakenShape
-        self.gameView.AIselected(self.shapes.index(self.currentShape))
-        self.inTurn = self.currentGameState.inTurn
+            foundChildren = False
+            for child in self.currentGameState.childrens:
+                if not child.haveLoosingChild:
+                    self.currentGameState = child
+                    foundChildren = True
+                    break
+            if not foundChildren:
+                self.currentGameState = self.currentGameState.childrens[0]
 
-        if self.quarto(self.board):
+        # get the position of the current shape on the new board
+        currentShapePosition = self.currentGameState.findPositionOnBoard(currentShapeNum)
+        print(currentShapeNum)
+        print(self.currentGameState.board)
+        surface = self.gameView.getSurface(currentShapePosition)
+        self.currentGameState.currentShape.draw(surface)
+        self.gameView.refresh(currentShapePosition)
+        self.currentGameState.alreadyTakenShape = self.currentGameState.alreadyTakenShape
+        self.currentGameState.currentShape = self.currentGameState.currentShape
+        self.currentGameState.alreadyTakenShape = self.currentGameState.alreadyTakenShape
+        self.gameView.AIselected(currentShapePosition)
+        self.currentGameState.inTurn = self.currentGameState.inTurn
+
+        if self.quarto(self.currentGameState.board):
             self.gameView.quarto("AI")
             self.done = True
-        self.inTurn = False
-        print(self.evaluation(self.board, self.inTurn))
-        
+        self.currentGameState.inTurn = False
+        print(self.evaluation(self.currentGameState.board, self.currentGameState.inTurn))
+
 
     # Turn of the player
     def PlayerPlay(self):
-        self.inTurn = True
-        if(self.currentShape != None):
+        self.currentGameState.inTurn = True
+        if(self.currentGameState.currentShape != None):
             self.playerChooseCase()
         if not self.done:
             self.playerChooseShape()
-        self.inTurn = False
+        self.currentGameState.inTurn = False
         self.updateCurrentGameState()
+
 
     # Place the shape in the board
     def playerChooseCase(self):
         #print("Please, choose a void case in the game board")
-        while(self.inTurn):
+        while(self.currentGameState.inTurn):
             self.gameView.waitEvent()
-            if(self.quarto(self.board)):
+            if(self.quarto(self.currentGameState.board)):
                 #print("QUARTO! You win the game")
                 self.gameView.quarto("YOU")
                 #self.gameView.end()
                 self.done = True
         
-        print(self.evaluation(self.board, self.inTurn))
+        print(self.evaluation(self.currentGameState.board, self.currentGameState.inTurn))
 
         
-        print(self.evaluation(self.board, self.inTurn))
+        print(self.evaluation(self.currentGameState.board, self.currentGameState.inTurn))
 
 
     def select(self, shape):
         """
         Hérité de gameView.Listener -> met à jour self.selected pour le playerChooseShape
         """
-        self.currentShape = self.shapes[shape]
-        if not self.alreadyTakenShape[shape]:
-            self.alreadyTakenShape[shape] = True
+        self.currentGameState.currentShape = self.currentGameState.shapes[shape]
+        if not self.currentGameState.alreadyTakenShape[shape]:
+            self.currentGameState.alreadyTakenShape[shape] = True
             self.selected = True
     
 
@@ -156,14 +166,14 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
 
 
     def mouseClick(self, surface, case):
-        if(self.board[case] == None):
-            self.currentShape.draw(surface)
+        if(self.currentGameState.board[case] == None):
+            self.currentGameState.currentShape.draw(surface)
             self.gameView.refresh(case)
-            self.board[case] = self.currentShape
-            self.inTurn = False
+            self.currentGameState.board[case] = self.currentGameState.currentShape
+            self.currentGameState.inTurn = False
         else:
             pass
-            #print("Choose an other case")
+            #print("Choose another case")
         
 
     def createShapes(self):
@@ -174,7 +184,7 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
                 for shape in ["circle", "rect"]:
                     for filled in [True, False]:
                         s = Shape(num, shape, color, size, filled, width, height)
-                        self.shapes.append(s)
+                        self.currentGameState.shapes.append(s)
                         num += 1
         
 
@@ -254,7 +264,7 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
             if playerTurn:
                 return self.connexion(board)
             else:
-                return self.connexion(self.board)
+                return self.connexion(self.currentGameState.board)
 
 
     def connexion(self,board):
@@ -337,10 +347,10 @@ class GameController(GameView.GameViewListener, StartWindow.Listener):
         return diag    
     
     def updateCurrentGameState(self):
-        self.currentGameState.board = self.board
-        self.currentGameState.currentShape = self.currentShape
-        self.currentGameState.alreadyTakenShape = self.alreadyTakenShape
-        self.currentGameState.inTurn = self.inTurn
+        self.currentGameState.board = self.currentGameState.board
+        self.currentGameState.currentShape = self.currentGameState.currentShape
+        self.currentGameState.alreadyTakenShape = self.currentGameState.alreadyTakenShape
+        self.currentGameState.inTurn = self.currentGameState.inTurn
         self.currentGameState.parent = None
 
 
