@@ -3,29 +3,31 @@ import random
 import copy
 
 class State:
-    def __init__(self, shapes:list=None, previousSelectedShape=None) -> None:
+    def __init__(self, shapes:list=None, previousSelectedShape:Shape=None) -> None:
         self.endQuarto = False
         self.board = [None for i in range(16)]
         """
-        0   1   2   3   \n
-        4   5   6   7   \n
-        8   9   10  11  \n
-        12  13  14  15
+        0   4   8   12  \n
+        1   5   9   13  \n
+        2   6   10  14  \n
+        3   7   11  15
         """
         self.availablePos = [i for i in range(16)]
         self.availableShapes = copy.deepcopy(shapes)
-        #self.shapes = self.listToDict(self.availableShapes)
-        #print(self.shapes)
-        #print(self.availableShapes)
-        #self.alreadyTakenShapes = [False for i in range(16)]
         self.previousSelectedShape = previousSelectedShape
     
 
     def getMaxNumberOfChilderen(self):
+        """
+        Return the maximum number of childeren for this state
+        """
         return len(self.availablePos) * len(self.availableShapes)
     
 
     def getAllPossibleChilderen(self) -> list:
+        """
+        Return the list of all possible childeren for this state
+        """
         allPossibleChilderen = []
         for pos in self.availablePos:
             for s in self.availableShapes:
@@ -34,6 +36,9 @@ class State:
 
 
     def createChild(self, child:tuple):
+        """
+        Update the state to obtain a child of the previous state
+        """
         if child == None:
             if not self.quasiTerminal():
                 print("error in createChild")
@@ -53,17 +58,22 @@ class State:
 
 
     def randomPlaceShapeOnBoard(self) -> int:
+        """
+        Place the previous selected shape on the board in an random selected available position
+        """
         if len(self.availablePos) > 0:
             pos = random.choice(self.availablePos)
             self.availablePos.remove(pos)
             self.board[pos] = self.previousSelectedShape
         else:
             pos = None
-            #print(self.availablePos)
         return pos
 
 
     def randomSelectShape(self) -> Shape:
+        """
+        Select randomly a niew current shape among the availables shape
+        """
         if len(self.availableShapes) > 0:
             self.previousSelectedShape = random.choice(self.availableShapes)
             self.availableShapes.remove(self.previousSelectedShape)
@@ -73,6 +83,9 @@ class State:
     
 
     def whyTerminal(self):
+        """
+        Help in case of error
+        """
         if self.endQuarto:
             print("quarto")
         print("available pos = ", self.availablePos)
@@ -81,21 +94,39 @@ class State:
             sh.append(s.getNum())
         print("available shapes = ", sh)
 
+    
+    def printBoard(self):
+        """
+        Print the board -> help in case of error
+        """
+        print("BOARD:")
+        for i, case in enumerate(self.board):
+            print("case ", i, ":", end=" ")
+            if case == None:
+                print("None")
+            else:
+                case.print()
+
 
     def isTerminal(self) -> bool:
+        """
+        Return True if the state is Terminal, False otherwise
+        """
         if self.quarto():
             self.endQuarto = True
             terminal = True
         else:
             if len(self.availablePos) == 0:
                 terminal = True
-                #print(self.terminal)
             else:
                 terminal = False
         return terminal
     
 
     def reward(self):
+        """
+        Return the reward associated to the state
+        """
         if self.endQuarto:
             return 1
         else:
@@ -103,38 +134,44 @@ class State:
         
 
     def randomAction(self):
+        """
+        Make a random action
+        """
         self.randomPlaceShapeOnBoard()
         self.randomSelectShape()
 
 
     def selectShape(self, s:int):
-        #print("select Shape:", s)
-        #print(self.shapes)
-        #self.previousSelectedShape = self.shapes[s]
+        """
+        Select the shape s
+        """
         for i in range(len(self.availableShapes)):
-            #print(i, end=" ")
             num = self.availableShapes[i].getNum()
             if s == num:
                 self.previousSelectedShape = self.availableShapes[i]
                 self.availableShapes.pop(i)
                 break
-        #print(" s:", s)
-        #print(self.availableShapes)
 
 
     def selectPos(self, pos:int):
-        #print("select pos", pos)
+        """
+        Place the previous selected shape at position pos on the board
+        """
         self.board[pos] = self.previousSelectedShape
         self.availablePos.remove(pos)
-        #print(pos)
-        #print(self.availablePos)
 
 
-    def getPreviousSelectedShape(self):
+    def getPreviousSelectedShape(self) -> Shape:
+        """
+        Return the previous selected shape (= current shape for the gameState)
+        """
         return self.previousSelectedShape
     
 
-    def quasiTerminal(self):
+    def quasiTerminal(self) -> bool:
+        """
+        Return true if the state is quasi terminal, False otherwise
+        """
         return len(self.availablePos) == 1 and len(self.availableShapes) == 0
 
 
@@ -157,11 +194,6 @@ class State:
         pieces_in_diag = [self.board[i] for i in range(3, 13, 3) if self.board[i] is not None]
         if len(pieces_in_diag) == 4 and self.has_common_property(pieces_in_diag):
             quarto = True
-        ## Write the winner at the end of the file
-        #if(quarto):
-        #    self.file.write(str(self.inTurn) + "\n")
-        
-        #if quarto : self.printBoard()
         return quarto
     
 
@@ -211,21 +243,3 @@ class State:
             if(pieces[i].getFilled() != filled):
                 return False
         return True
-    
-
-
-    def printBoard(self):
-        print("BOARD:")
-        for i, case in enumerate(self.board):
-            print("case ", i, ":", end=" ")
-            if case == None:
-                print("None")
-            else:
-                case.print()
-
-
-    def listToDict(self, liste:list):
-        dico = {}
-        for i in range(len(liste)):
-            dico[i] = liste[i]
-        return dico

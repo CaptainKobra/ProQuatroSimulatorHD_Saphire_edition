@@ -33,10 +33,16 @@ class Node:
     
 
     def addToN(self, val):
+        """
+        Add val to N
+        """
         self.N += val
 
 
     def addToQ(self, val):
+        """
+        Add val to Q
+        """
         self.Q += val
 
 
@@ -49,7 +55,6 @@ class Node:
     
 
     def isTerminal(self) -> bool:
-        #if val: print("node is terminal")
         return self.state.isTerminal() or self.terminal
     
 

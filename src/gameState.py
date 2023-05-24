@@ -6,7 +6,7 @@ class gameState:
         self.board = board
         self.currentShape = currentShape
         self.inTurn = inTurn
-        self.winOrLose = None
+        self.haveLoosingChild = None
         self.alreadyTakenShape = alreadyTakenShape
         self.shapes = shapes
         self.loosingLeafs = []
@@ -14,58 +14,61 @@ class gameState:
 
 
     def generateTree(self ,depth):
+        """
+        Generate the tree of possibilities for the current game state util a given depth
+        The parameter force is used to force the generation of the tree even if a win or a lose is found
+        to avoid the case where there are no other options than loosing
+        """
+        self.childrens = []
+        self.haveLoosingChild = False
+        self.loosingLeafs = []
+        self.winningLeafs = []
         if depth >= 0:
+            self.alreadyTakenShape[self.currentShape.num] = True
+
             boards =[]
-            
             for i in range(16):
                 if self.board[i] is None:
                     newBoard = self.board.copy()
                     newBoard[i] = self.currentShape
                     boards.append(newBoard)
 
-            index = self.shapes.index(self.currentShape)
-            newAlreadyTakenShape = self.alreadyTakenShape.copy()
-            newAlreadyTakenShape[index] = True
-
             for board in boards:
-                if self.quarto(board):
-                    if self.inTurn:
-                        # get the indices of the current shape in shapes
-                        index = self.shapes.index(self.currentShape)
-                        newAlreadyTakenShape = self.alreadyTakenShape.copy()
-                        newAlreadyTakenShape[index] = True
-                        newInTurn = not self.inTurn
-                        newGameState = gameState(board, newAlreadyTakenShape, self.shapes, newInTurn, self)
-                        newGameState.winOrLose = "win"
-                        self.winningLeafs.append(newGameState)
-                        boards.remove(board)
-
-                    else:
-                        # get the indices of the current shape in shapes
-                        index = self.shapes.index(self.currentShape)
-                        newAlreadyTakenShape = self.alreadyTakenShape.copy()
-                        newAlreadyTakenShape[index] = True
-                        newInTurn = not self.inTurn
-                        newGameState = gameState(board, newAlreadyTakenShape, self.shapes, newInTurn, self)
-                        newGameState.winOrLose = "loose"
-                        self.loosingLeafs.append(newGameState)
-                        boards.remove(board)
-                   
-
-            for board in boards:
-                for shapeIndice in newAlreadyTakenShape:
-                    if not shapeIndice:
-                        # get the indices of the current shape in shapes
-                        index = self.shapes.index(self.currentShape)
-                        newAlreadyTakenShape = self.alreadyTakenShape.copy()
-                        newAlreadyTakenShape[index] = True
-                        newInTurn = not self.inTurn
+                for shapeIndice in range(len(self.alreadyTakenShape)-1):
+                    if not self.alreadyTakenShape[shapeIndice]:
                         newCurrentShape = self.shapes[shapeIndice]
+                        newAlreadyTakenShape = self.alreadyTakenShape.copy()
+                        newAlreadyTakenShape[shapeIndice] = True
+                        newInTurn = not self.inTurn
                         newGameState = gameState(board, newCurrentShape, newAlreadyTakenShape, self.shapes, newInTurn, self)
-                        self.childrens.append(newGameState)
-                        newGameState.generateTree(depth-1)
-    
-    
+
+                        if self.quarto(board):
+                            if not self.inTurn:
+                                self.winningLeafs.append(newGameState)
+                                break
+                            else:
+                                self.haveLoosingChild = True
+                                self.loosingLeafs.append(newGameState)
+                                break
+                        else:
+                            newGameState.generateTree(depth-1)
+                            self.childrens.append(newGameState)
+
+                            
+
+    def findPositionOnBoard(self, shapeNum):
+        """
+        Find the position of the piece on the board
+        """
+        for i in range(16):
+            if self.board[i] != None:
+                if self.board[i].num == shapeNum:
+                    return i
+        print("Piece not found on board")
+        return None
+        
+
+
     def quarto(self,board):
         quarto = False
         # Check rows
